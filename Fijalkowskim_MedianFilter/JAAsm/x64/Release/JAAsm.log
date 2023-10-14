@@ -1,0 +1,4 @@
+﻿  Assembling JAAsm.asm...
+     Creating library D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Release\JAAsm.lib and object D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Release\JAAsm.exp
+  LINK : /LTCG specified but no code generation required; remove /LTCG from the link command line to improve linker performance
+  JAAsm.vcxproj -> D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll
