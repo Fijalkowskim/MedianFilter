@@ -29,85 +29,35 @@ namespace Fijalkowskim_MedianFilter
         /// </summary>
         private void InitializeComponent()
         {
-            this.calculateButton = new System.Windows.Forms.Button();
-            this.textBoxA = new System.Windows.Forms.TextBox();
-            this.textBoxB = new System.Windows.Forms.TextBox();
-            this.textBoxALabel = new System.Windows.Forms.Label();
-            this.textBoxBLabel = new System.Windows.Forms.Label();
-            this.resultLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.selectAsm = new System.Windows.Forms.RadioButton();
             this.libraryLabel = new System.Windows.Forms.Label();
             this.selectCpp = new System.Windows.Forms.RadioButton();
-            this.currentExecutionTimeLabel = new System.Windows.Forms.Label();
             this.previousExecutionTimeLabel = new System.Windows.Forms.Label();
-            this.plusLabel = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.openTestWindow = new System.Windows.Forms.Button();
+            this.currentExecutionTimeLabel = new System.Windows.Forms.Label();
+            this.baseImagePreview = new System.Windows.Forms.PictureBox();
+            this.basePreviewGroup = new System.Windows.Forms.GroupBox();
+            this.resultPreviewGroup = new System.Windows.Forms.GroupBox();
+            this.resultImagePreview = new System.Windows.Forms.PictureBox();
+            this.baseImageLabel = new System.Windows.Forms.Label();
+            this.resultImageLabel = new System.Windows.Forms.Label();
+            this.uploadImageButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.baseImagePreview)).BeginInit();
+            this.basePreviewGroup.SuspendLayout();
+            this.resultPreviewGroup.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.resultImagePreview)).BeginInit();
             this.SuspendLayout();
-            // 
-            // calculateButton
-            // 
-            this.calculateButton.Location = new System.Drawing.Point(54, 218);
-            this.calculateButton.Margin = new System.Windows.Forms.Padding(5);
-            this.calculateButton.Name = "calculateButton";
-            this.calculateButton.Size = new System.Drawing.Size(129, 40);
-            this.calculateButton.TabIndex = 1;
-            this.calculateButton.Text = "Calculate";
-            this.calculateButton.UseVisualStyleBackColor = true;
-            this.calculateButton.Click += new System.EventHandler(this.calculateButton_Click);
-            // 
-            // textBoxA
-            // 
-            this.textBoxA.Location = new System.Drawing.Point(54, 56);
-            this.textBoxA.Margin = new System.Windows.Forms.Padding(5);
-            this.textBoxA.Name = "textBoxA";
-            this.textBoxA.Size = new System.Drawing.Size(146, 33);
-            this.textBoxA.TabIndex = 2;
-            // 
-            // textBoxB
-            // 
-            this.textBoxB.Location = new System.Drawing.Point(256, 56);
-            this.textBoxB.Margin = new System.Windows.Forms.Padding(5);
-            this.textBoxB.Name = "textBoxB";
-            this.textBoxB.Size = new System.Drawing.Size(146, 33);
-            this.textBoxB.TabIndex = 3;
-            // 
-            // textBoxALabel
-            // 
-            this.textBoxALabel.AutoSize = true;
-            this.textBoxALabel.Location = new System.Drawing.Point(113, 25);
-            this.textBoxALabel.Name = "textBoxALabel";
-            this.textBoxALabel.Size = new System.Drawing.Size(23, 26);
-            this.textBoxALabel.TabIndex = 4;
-            this.textBoxALabel.Text = "a";
-            // 
-            // textBoxBLabel
-            // 
-            this.textBoxBLabel.AutoSize = true;
-            this.textBoxBLabel.Location = new System.Drawing.Point(319, 25);
-            this.textBoxBLabel.Name = "textBoxBLabel";
-            this.textBoxBLabel.Size = new System.Drawing.Size(23, 26);
-            this.textBoxBLabel.TabIndex = 5;
-            this.textBoxBLabel.Text = "b";
-            // 
-            // resultLabel
-            // 
-            this.resultLabel.AutoSize = true;
-            this.resultLabel.Location = new System.Drawing.Point(235, 225);
-            this.resultLabel.Name = "resultLabel";
-            this.resultLabel.Size = new System.Drawing.Size(69, 26);
-            this.resultLabel.TabIndex = 6;
-            this.resultLabel.Text = "Result";
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.selectAsm);
             this.groupBox1.Controls.Add(this.libraryLabel);
             this.groupBox1.Controls.Add(this.selectCpp);
-            this.groupBox1.Location = new System.Drawing.Point(54, 106);
+            this.groupBox1.Location = new System.Drawing.Point(44, 405);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(447, 83);
+            this.groupBox1.Size = new System.Drawing.Size(304, 90);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             // 
@@ -142,85 +92,146 @@ namespace Fijalkowskim_MedianFilter
             this.selectCpp.Text = "C++";
             this.selectCpp.UseVisualStyleBackColor = true;
             // 
-            // currentExecutionTimeLabel
-            // 
-            this.currentExecutionTimeLabel.AutoSize = true;
-            this.currentExecutionTimeLabel.Location = new System.Drawing.Point(54, 296);
-            this.currentExecutionTimeLabel.Name = "currentExecutionTimeLabel";
-            this.currentExecutionTimeLabel.Size = new System.Drawing.Size(225, 26);
-            this.currentExecutionTimeLabel.TabIndex = 8;
-            this.currentExecutionTimeLabel.Text = "Current execution Time";
-            // 
             // previousExecutionTimeLabel
             // 
             this.previousExecutionTimeLabel.AutoSize = true;
-            this.previousExecutionTimeLabel.Location = new System.Drawing.Point(54, 336);
+            this.previousExecutionTimeLabel.Location = new System.Drawing.Point(407, 490);
             this.previousExecutionTimeLabel.Name = "previousExecutionTimeLabel";
             this.previousExecutionTimeLabel.Size = new System.Drawing.Size(233, 26);
             this.previousExecutionTimeLabel.TabIndex = 9;
             this.previousExecutionTimeLabel.Text = "Previous execution time:";
             // 
-            // plusLabel
+            // openTestWindow
             // 
-            this.plusLabel.AutoSize = true;
-            this.plusLabel.Location = new System.Drawing.Point(464, 56);
-            this.plusLabel.Name = "plusLabel";
-            this.plusLabel.Size = new System.Drawing.Size(95, 26);
-            this.plusLabel.TabIndex = 10;
-            this.plusLabel.Text = "result = a";
+            this.openTestWindow.Location = new System.Drawing.Point(423, 548);
+            this.openTestWindow.Margin = new System.Windows.Forms.Padding(5);
+            this.openTestWindow.Name = "openTestWindow";
+            this.openTestWindow.Size = new System.Drawing.Size(190, 58);
+            this.openTestWindow.TabIndex = 12;
+            this.openTestWindow.Text = "Open test window";
+            this.openTestWindow.UseVisualStyleBackColor = true;
+            this.openTestWindow.Click += new System.EventHandler(this.openTestWindow_Click);
             // 
-            // label1
+            // currentExecutionTimeLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Roboto Slab", 10.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(551, 46);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(17, 19);
-            this.label1.TabIndex = 11;
-            this.label1.Text = "b";
+            this.currentExecutionTimeLabel.AutoSize = true;
+            this.currentExecutionTimeLabel.Location = new System.Drawing.Point(407, 423);
+            this.currentExecutionTimeLabel.Name = "currentExecutionTimeLabel";
+            this.currentExecutionTimeLabel.Size = new System.Drawing.Size(225, 26);
+            this.currentExecutionTimeLabel.TabIndex = 8;
+            this.currentExecutionTimeLabel.Text = "Current execution Time";
+            // 
+            // baseImagePreview
+            // 
+            this.baseImagePreview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.baseImagePreview.Location = new System.Drawing.Point(6, 16);
+            this.baseImagePreview.Name = "baseImagePreview";
+            this.baseImagePreview.Size = new System.Drawing.Size(505, 319);
+            this.baseImagePreview.TabIndex = 13;
+            this.baseImagePreview.TabStop = false;
+            // 
+            // basePreviewGroup
+            // 
+            this.basePreviewGroup.BackColor = System.Drawing.Color.Silver;
+            this.basePreviewGroup.Controls.Add(this.baseImagePreview);
+            this.basePreviewGroup.Location = new System.Drawing.Point(27, 36);
+            this.basePreviewGroup.Name = "basePreviewGroup";
+            this.basePreviewGroup.Size = new System.Drawing.Size(517, 341);
+            this.basePreviewGroup.TabIndex = 14;
+            this.basePreviewGroup.TabStop = false;
+            // 
+            // resultPreviewGroup
+            // 
+            this.resultPreviewGroup.BackColor = System.Drawing.Color.Silver;
+            this.resultPreviewGroup.Controls.Add(this.resultImagePreview);
+            this.resultPreviewGroup.Location = new System.Drawing.Point(580, 36);
+            this.resultPreviewGroup.Name = "resultPreviewGroup";
+            this.resultPreviewGroup.Size = new System.Drawing.Size(517, 341);
+            this.resultPreviewGroup.TabIndex = 15;
+            this.resultPreviewGroup.TabStop = false;
+            // 
+            // resultImagePreview
+            // 
+            this.resultImagePreview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.resultImagePreview.Location = new System.Drawing.Point(6, 16);
+            this.resultImagePreview.Name = "resultImagePreview";
+            this.resultImagePreview.Size = new System.Drawing.Size(505, 319);
+            this.resultImagePreview.TabIndex = 13;
+            this.resultImagePreview.TabStop = false;
+            // 
+            // baseImageLabel
+            // 
+            this.baseImageLabel.AutoSize = true;
+            this.baseImageLabel.Location = new System.Drawing.Point(27, 7);
+            this.baseImageLabel.Name = "baseImageLabel";
+            this.baseImageLabel.Size = new System.Drawing.Size(119, 26);
+            this.baseImageLabel.TabIndex = 16;
+            this.baseImageLabel.Text = "Base image:";
+            // 
+            // resultImageLabel
+            // 
+            this.resultImageLabel.AutoSize = true;
+            this.resultImageLabel.Location = new System.Drawing.Point(580, 7);
+            this.resultImageLabel.Name = "resultImageLabel";
+            this.resultImageLabel.Size = new System.Drawing.Size(147, 26);
+            this.resultImageLabel.TabIndex = 17;
+            this.resultImageLabel.Text = "Filtered image:";
+            // 
+            // uploadImageButton
+            // 
+            this.uploadImageButton.Location = new System.Drawing.Point(88, 516);
+            this.uploadImageButton.Margin = new System.Windows.Forms.Padding(5);
+            this.uploadImageButton.Name = "uploadImageButton";
+            this.uploadImageButton.Size = new System.Drawing.Size(190, 58);
+            this.uploadImageButton.TabIndex = 18;
+            this.uploadImageButton.Text = "Upload image";
+            this.uploadImageButton.UseVisualStyleBackColor = true;
+            this.uploadImageButton.Click += new System.EventHandler(this.uploadImageButton_Click);
             // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(801, 420);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.plusLabel);
+            this.ClientSize = new System.Drawing.Size(1162, 633);
+            this.Controls.Add(this.uploadImageButton);
+            this.Controls.Add(this.resultImageLabel);
+            this.Controls.Add(this.baseImageLabel);
+            this.Controls.Add(this.resultPreviewGroup);
+            this.Controls.Add(this.basePreviewGroup);
+            this.Controls.Add(this.openTestWindow);
             this.Controls.Add(this.previousExecutionTimeLabel);
             this.Controls.Add(this.currentExecutionTimeLabel);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.resultLabel);
-            this.Controls.Add(this.textBoxBLabel);
-            this.Controls.Add(this.textBoxALabel);
-            this.Controls.Add(this.textBoxB);
-            this.Controls.Add(this.textBoxA);
-            this.Controls.Add(this.calculateButton);
             this.Font = new System.Drawing.Font("Roboto Slab", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "MainMenu";
             this.Text = "Median Filter";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.baseImagePreview)).EndInit();
+            this.basePreviewGroup.ResumeLayout(false);
+            this.resultPreviewGroup.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.resultImagePreview)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.Button calculateButton;
-        private System.Windows.Forms.TextBox textBoxA;
-        private System.Windows.Forms.TextBox textBoxB;
-        private System.Windows.Forms.Label textBoxALabel;
-        private System.Windows.Forms.Label textBoxBLabel;
-        private System.Windows.Forms.Label resultLabel;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton selectCpp;
-        private System.Windows.Forms.RadioButton selectAsm;
         private System.Windows.Forms.Label libraryLabel;
-        private System.Windows.Forms.Label currentExecutionTimeLabel;
         private System.Windows.Forms.Label previousExecutionTimeLabel;
-        private System.Windows.Forms.Label plusLabel;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button openTestWindow;
+        private System.Windows.Forms.RadioButton selectAsm;
+        private System.Windows.Forms.Label currentExecutionTimeLabel;
+        private System.Windows.Forms.PictureBox baseImagePreview;
+        private System.Windows.Forms.GroupBox basePreviewGroup;
+        private System.Windows.Forms.GroupBox resultPreviewGroup;
+        private System.Windows.Forms.PictureBox resultImagePreview;
+        private System.Windows.Forms.Label baseImageLabel;
+        private System.Windows.Forms.Label resultImageLabel;
+        private System.Windows.Forms.Button uploadImageButton;
     }
 }
 

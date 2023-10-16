@@ -34,6 +34,7 @@ namespace Fijalkowskim_MedianFilter
 
         public int GetResult(int a, int b, DllType dllType)
         {          
+            stopwatch.Reset();
             int result = 0;
             switch (dllType)
             {
@@ -51,6 +52,7 @@ namespace Fijalkowskim_MedianFilter
             if (currentExecutionTime != TimeSpan.Zero)
                 previousExecutionTime = currentExecutionTime;
             currentExecutionTime = stopwatch.Elapsed;
+
             return result;
         }
     }
