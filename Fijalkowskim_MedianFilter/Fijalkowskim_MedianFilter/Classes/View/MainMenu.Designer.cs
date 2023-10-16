@@ -41,6 +41,8 @@ namespace Fijalkowskim_MedianFilter
             this.selectCpp = new System.Windows.Forms.RadioButton();
             this.currentExecutionTimeLabel = new System.Windows.Forms.Label();
             this.previousExecutionTimeLabel = new System.Windows.Forms.Label();
+            this.plusLabel = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -158,11 +160,32 @@ namespace Fijalkowskim_MedianFilter
             this.previousExecutionTimeLabel.TabIndex = 9;
             this.previousExecutionTimeLabel.Text = "Previous execution time:";
             // 
+            // plusLabel
+            // 
+            this.plusLabel.AutoSize = true;
+            this.plusLabel.Location = new System.Drawing.Point(464, 56);
+            this.plusLabel.Name = "plusLabel";
+            this.plusLabel.Size = new System.Drawing.Size(95, 26);
+            this.plusLabel.TabIndex = 10;
+            this.plusLabel.Text = "result = a";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Roboto Slab", 10.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(551, 46);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(17, 19);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "b";
+            // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(801, 420);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.plusLabel);
             this.Controls.Add(this.previousExecutionTimeLabel);
             this.Controls.Add(this.currentExecutionTimeLabel);
             this.Controls.Add(this.groupBox1);
@@ -196,6 +219,8 @@ namespace Fijalkowskim_MedianFilter
         private System.Windows.Forms.Label libraryLabel;
         private System.Windows.Forms.Label currentExecutionTimeLabel;
         private System.Windows.Forms.Label previousExecutionTimeLabel;
+        private System.Windows.Forms.Label plusLabel;
+        private System.Windows.Forms.Label label1;
     }
 }
 

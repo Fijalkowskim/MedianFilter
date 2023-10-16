@@ -1,2 +1,3 @@
-﻿     Creating library D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.lib and object D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.exp
-  JAAsm.vcxproj -> D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll
+﻿  Assembling JAAsm.asm...
+     Creating library D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.lib and object D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.exp
+  JAAsm.vcxproj -> D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll

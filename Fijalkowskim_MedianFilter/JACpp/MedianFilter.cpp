@@ -1,7 +1,12 @@
 #include "pch.h"
 #include "MedianFilter.h"
 
-int MedianFilter::Add(int a, int b)
+int MedianFilter::CppFunc(int a, int b)
 {
-    return a+b;
+    int pow = 1;
+    for (int i = 0; i < b; i++) {
+        pow = pow * a;
+    }
+
+    return pow;
 }

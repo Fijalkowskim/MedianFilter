@@ -7,11 +7,19 @@ namespace Fijalkowskim_MedianFilter
     public enum DllType { CPP, ASM}
     public class DataManager
     {
-        [DllImport(@"D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
+#if DEBUG
+        [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
         static extern int MyProc1(int a, int b);
 
-        [DllImport(@"D:\1 Studia\JA\Sem5\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
-        static extern int Add(int a, int b);
+        [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
+        static extern int CppFunc(int a, int b);
+#else
+ [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
+        static extern int MyProc1(int a, int b);
+
+        [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JACpp.dll")]
+        static extern int CppFunc(int a, int b);
+#endif
 
         public TimeSpan currentExecutionTime { get; private set; }
         public TimeSpan previousExecutionTime { get; private set; }
@@ -31,7 +39,7 @@ namespace Fijalkowskim_MedianFilter
             {
                 case DllType.CPP:
                     stopwatch.Start();
-                    result =  Add(a, b);
+                    result = CppFunc(a, b);
                     stopwatch.Stop();
                     break;
                 case DllType.ASM:

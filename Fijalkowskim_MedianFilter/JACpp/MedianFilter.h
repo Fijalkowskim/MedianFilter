@@ -2,11 +2,11 @@
 class MedianFilter
 {
 public: 
-	int Add(int a, int b);
+	int CppFunc(int a, int b);
 };
 
-extern "C" __declspec(dllexport) int Add(int a, int b)
+extern "C" __declspec(dllexport) int CppFunc(int a, int b)
 {
 	MedianFilter m;
-	return m.Add(a, b);
+	return m.CppFunc(a, b);
 }
