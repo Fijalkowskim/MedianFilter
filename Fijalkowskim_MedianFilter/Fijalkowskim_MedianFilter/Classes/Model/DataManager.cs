@@ -1,6 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System;
+using System.Drawing;
+
 
 namespace Fijalkowskim_MedianFilter
 {  
@@ -24,12 +26,28 @@ namespace Fijalkowskim_MedianFilter
         public TimeSpan currentExecutionTime { get; private set; }
         public TimeSpan previousExecutionTime { get; private set; }
         Stopwatch stopwatch;
+        public Bitmap loadedBitmap { get; set; }
+        
 
         public DataManager()
         {
             currentExecutionTime = TimeSpan.Zero;
             previousExecutionTime = TimeSpan.Zero;
             stopwatch = new Stopwatch();
+            loadedBitmap = null;
+        }
+        public Bitmap MedianFiltering(Bitmap bitmap)
+        {
+            Bitmap filteredBitmap = new Bitmap(bitmap.Width, bitmap.Height);
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                for (int x = 0; x < bitmap.Width; x++)
+                {
+                    Color newColor = Color.FromArgb(0, bitmap.GetPixel(x, y).G, bitmap.GetPixel(x, y).B);
+                    filteredBitmap.SetPixel(x, y, newColor);
+                }
+            }
+            return filteredBitmap;
         }
 
         public int GetResult(int a, int b, DllType dllType)

@@ -43,6 +43,7 @@ namespace Fijalkowskim_MedianFilter
             this.baseImageLabel = new System.Windows.Forms.Label();
             this.resultImageLabel = new System.Windows.Forms.Label();
             this.uploadImageButton = new System.Windows.Forms.Button();
+            this.filterImageButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.baseImagePreview)).BeginInit();
             this.basePreviewGroup.SuspendLayout();
@@ -57,7 +58,7 @@ namespace Fijalkowskim_MedianFilter
             this.groupBox1.Controls.Add(this.selectCpp);
             this.groupBox1.Location = new System.Drawing.Point(44, 405);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(304, 90);
+            this.groupBox1.Size = new System.Drawing.Size(405, 90);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             // 
@@ -95,7 +96,7 @@ namespace Fijalkowskim_MedianFilter
             // previousExecutionTimeLabel
             // 
             this.previousExecutionTimeLabel.AutoSize = true;
-            this.previousExecutionTimeLabel.Location = new System.Drawing.Point(407, 490);
+            this.previousExecutionTimeLabel.Location = new System.Drawing.Point(502, 469);
             this.previousExecutionTimeLabel.Name = "previousExecutionTimeLabel";
             this.previousExecutionTimeLabel.Size = new System.Drawing.Size(233, 26);
             this.previousExecutionTimeLabel.TabIndex = 9;
@@ -103,7 +104,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             // openTestWindow
             // 
-            this.openTestWindow.Location = new System.Drawing.Point(423, 548);
+            this.openTestWindow.Location = new System.Drawing.Point(901, 516);
             this.openTestWindow.Margin = new System.Windows.Forms.Padding(5);
             this.openTestWindow.Name = "openTestWindow";
             this.openTestWindow.Size = new System.Drawing.Size(190, 58);
@@ -115,7 +116,7 @@ namespace Fijalkowskim_MedianFilter
             // currentExecutionTimeLabel
             // 
             this.currentExecutionTimeLabel.AutoSize = true;
-            this.currentExecutionTimeLabel.Location = new System.Drawing.Point(407, 423);
+            this.currentExecutionTimeLabel.Location = new System.Drawing.Point(502, 423);
             this.currentExecutionTimeLabel.Name = "currentExecutionTimeLabel";
             this.currentExecutionTimeLabel.Size = new System.Drawing.Size(225, 26);
             this.currentExecutionTimeLabel.TabIndex = 8;
@@ -127,6 +128,7 @@ namespace Fijalkowskim_MedianFilter
             this.baseImagePreview.Location = new System.Drawing.Point(6, 16);
             this.baseImagePreview.Name = "baseImagePreview";
             this.baseImagePreview.Size = new System.Drawing.Size(505, 319);
+            this.baseImagePreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.baseImagePreview.TabIndex = 13;
             this.baseImagePreview.TabStop = false;
             // 
@@ -156,6 +158,7 @@ namespace Fijalkowskim_MedianFilter
             this.resultImagePreview.Location = new System.Drawing.Point(6, 16);
             this.resultImagePreview.Name = "resultImagePreview";
             this.resultImagePreview.Size = new System.Drawing.Size(505, 319);
+            this.resultImagePreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.resultImagePreview.TabIndex = 13;
             this.resultImagePreview.TabStop = false;
             // 
@@ -179,7 +182,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             // uploadImageButton
             // 
-            this.uploadImageButton.Location = new System.Drawing.Point(88, 516);
+            this.uploadImageButton.Location = new System.Drawing.Point(44, 516);
             this.uploadImageButton.Margin = new System.Windows.Forms.Padding(5);
             this.uploadImageButton.Name = "uploadImageButton";
             this.uploadImageButton.Size = new System.Drawing.Size(190, 58);
@@ -188,11 +191,23 @@ namespace Fijalkowskim_MedianFilter
             this.uploadImageButton.UseVisualStyleBackColor = true;
             this.uploadImageButton.Click += new System.EventHandler(this.uploadImageButton_Click);
             // 
+            // filterImageButton
+            // 
+            this.filterImageButton.Location = new System.Drawing.Point(259, 516);
+            this.filterImageButton.Margin = new System.Windows.Forms.Padding(5);
+            this.filterImageButton.Name = "filterImageButton";
+            this.filterImageButton.Size = new System.Drawing.Size(190, 58);
+            this.filterImageButton.TabIndex = 19;
+            this.filterImageButton.Text = "Filter image";
+            this.filterImageButton.UseVisualStyleBackColor = true;
+            this.filterImageButton.Click += new System.EventHandler(this.filterImageButton_Click);
+            // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1162, 633);
+            this.Controls.Add(this.filterImageButton);
             this.Controls.Add(this.uploadImageButton);
             this.Controls.Add(this.resultImageLabel);
             this.Controls.Add(this.baseImageLabel);
@@ -232,6 +247,7 @@ namespace Fijalkowskim_MedianFilter
         private System.Windows.Forms.Label baseImageLabel;
         private System.Windows.Forms.Label resultImageLabel;
         private System.Windows.Forms.Button uploadImageButton;
+        private System.Windows.Forms.Button filterImageButton;
     }
 }
 

@@ -59,5 +59,15 @@ namespace Fijalkowskim_MedianFilter.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap test_img {
+            get {
+                object obj = ResourceManager.GetObject("test_img", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
