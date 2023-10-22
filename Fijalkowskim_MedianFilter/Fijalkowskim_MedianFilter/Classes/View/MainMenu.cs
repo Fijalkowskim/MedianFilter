@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,14 +26,23 @@ namespace Fijalkowskim_MedianFilter
         }
 
 
-
-        private void openTestWindow_Click(object sender, EventArgs e)
-        {
-            controller.OpenTestWindow();
-        }
-
         private void uploadImageButton_Click(object sender, EventArgs e)
         {
+            int numberOfThreads;
+            try
+            {
+                numberOfThreads = Int32.Parse(threadsNumber.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Enter a number of threads between 1 and 64", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (numberOfThreads < 1 || numberOfThreads > 64)
+            {
+                MessageBox.Show("Enter a number of threads between 1 and 64", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); 
+                return; 
+            }
             try
             {
                 OpenFileDialog dialog = new OpenFileDialog();
@@ -40,27 +50,37 @@ namespace Fijalkowskim_MedianFilter
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     Bitmap bitmap = new Bitmap(dialog.FileName);
+                    controller.dataManager.LoadBitmap(bitmap, numberOfThreads);
                     baseImagePreview.Image = bitmap;
-                    controller.dataManager.loadedBitmap = bitmap;
                 }
             }
             catch (Exception)
             {
-                MessageBox.Show("An error occured", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Wrong file selected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
 
         private void filterImageButton_Click(object sender, EventArgs e)
-        {
+        {               
             if(controller.dataManager.loadedBitmap != null)
             {
-                resultImagePreview.Image = controller.dataManager.MedianFiltering(controller.dataManager.loadedBitmap);
+                DllType dllType = selectAsm.Checked ? DllType.ASM : selectCpp.Checked ? DllType.CPP : DllType.CPP;
+                string executionTime = "";
+                string previousExecutionTime = "";
+
+                resultImagePreview.Image = controller.GetFunctionResult(controller.dataManager.loadedBitmap,
+                    dllType, ref executionTime, ref previousExecutionTime);
+
+                currentExecutionTimeLabel.Text = $"Execution time: {executionTime}ms";
+                if (previousExecutionTime != "") previousExecutionTimeLabel.Text = $"Previous execution time: {previousExecutionTime}ms";
+
             }
             else
             {
-                MessageBox.Show("You must upload image first");
+                MessageBox.Show("You must upload an image first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
     }
 }

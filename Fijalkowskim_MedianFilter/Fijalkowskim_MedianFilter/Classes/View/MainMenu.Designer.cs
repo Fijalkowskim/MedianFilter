@@ -34,7 +34,6 @@ namespace Fijalkowskim_MedianFilter
             this.libraryLabel = new System.Windows.Forms.Label();
             this.selectCpp = new System.Windows.Forms.RadioButton();
             this.previousExecutionTimeLabel = new System.Windows.Forms.Label();
-            this.openTestWindow = new System.Windows.Forms.Button();
             this.currentExecutionTimeLabel = new System.Windows.Forms.Label();
             this.baseImagePreview = new System.Windows.Forms.PictureBox();
             this.basePreviewGroup = new System.Windows.Forms.GroupBox();
@@ -44,6 +43,8 @@ namespace Fijalkowskim_MedianFilter
             this.resultImageLabel = new System.Windows.Forms.Label();
             this.uploadImageButton = new System.Windows.Forms.Button();
             this.filterImageButton = new System.Windows.Forms.Button();
+            this.threadsNumber = new System.Windows.Forms.TextBox();
+            this.enterThreadsNumber = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.baseImagePreview)).BeginInit();
             this.basePreviewGroup.SuspendLayout();
@@ -56,7 +57,7 @@ namespace Fijalkowskim_MedianFilter
             this.groupBox1.Controls.Add(this.selectAsm);
             this.groupBox1.Controls.Add(this.libraryLabel);
             this.groupBox1.Controls.Add(this.selectCpp);
-            this.groupBox1.Location = new System.Drawing.Point(44, 405);
+            this.groupBox1.Location = new System.Drawing.Point(44, 383);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(405, 90);
             this.groupBox1.TabIndex = 7;
@@ -101,17 +102,6 @@ namespace Fijalkowskim_MedianFilter
             this.previousExecutionTimeLabel.Size = new System.Drawing.Size(233, 26);
             this.previousExecutionTimeLabel.TabIndex = 9;
             this.previousExecutionTimeLabel.Text = "Previous execution time:";
-            // 
-            // openTestWindow
-            // 
-            this.openTestWindow.Location = new System.Drawing.Point(901, 516);
-            this.openTestWindow.Margin = new System.Windows.Forms.Padding(5);
-            this.openTestWindow.Name = "openTestWindow";
-            this.openTestWindow.Size = new System.Drawing.Size(190, 58);
-            this.openTestWindow.TabIndex = 12;
-            this.openTestWindow.Text = "Open test window";
-            this.openTestWindow.UseVisualStyleBackColor = true;
-            this.openTestWindow.Click += new System.EventHandler(this.openTestWindow_Click);
             // 
             // currentExecutionTimeLabel
             // 
@@ -202,18 +192,40 @@ namespace Fijalkowskim_MedianFilter
             this.filterImageButton.UseVisualStyleBackColor = true;
             this.filterImageButton.Click += new System.EventHandler(this.filterImageButton_Click);
             // 
+            // threadsNumber
+            // 
+            this.threadsNumber.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.threadsNumber.Location = new System.Drawing.Point(336, 485);
+            this.threadsNumber.MaxLength = 2;
+            this.threadsNumber.Name = "threadsNumber";
+            this.threadsNumber.PlaceholderText = "1";
+            this.threadsNumber.Size = new System.Drawing.Size(50, 26);
+            this.threadsNumber.TabIndex = 20;
+            this.threadsNumber.Text = "1";
+            this.threadsNumber.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // enterThreadsNumber
+            // 
+            this.enterThreadsNumber.AutoSize = true;
+            this.enterThreadsNumber.Location = new System.Drawing.Point(44, 485);
+            this.enterThreadsNumber.Name = "enterThreadsNumber";
+            this.enterThreadsNumber.Size = new System.Drawing.Size(286, 26);
+            this.enterThreadsNumber.TabIndex = 21;
+            this.enterThreadsNumber.Text = "Enter number of threads (1-64)";
+            // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1162, 633);
+            this.Controls.Add(this.enterThreadsNumber);
+            this.Controls.Add(this.threadsNumber);
             this.Controls.Add(this.filterImageButton);
             this.Controls.Add(this.uploadImageButton);
             this.Controls.Add(this.resultImageLabel);
             this.Controls.Add(this.baseImageLabel);
             this.Controls.Add(this.resultPreviewGroup);
             this.Controls.Add(this.basePreviewGroup);
-            this.Controls.Add(this.openTestWindow);
             this.Controls.Add(this.previousExecutionTimeLabel);
             this.Controls.Add(this.currentExecutionTimeLabel);
             this.Controls.Add(this.groupBox1);
@@ -237,7 +249,6 @@ namespace Fijalkowskim_MedianFilter
         private System.Windows.Forms.RadioButton selectCpp;
         private System.Windows.Forms.Label libraryLabel;
         private System.Windows.Forms.Label previousExecutionTimeLabel;
-        private System.Windows.Forms.Button openTestWindow;
         private System.Windows.Forms.RadioButton selectAsm;
         private System.Windows.Forms.Label currentExecutionTimeLabel;
         private System.Windows.Forms.PictureBox baseImagePreview;
@@ -248,6 +259,8 @@ namespace Fijalkowskim_MedianFilter
         private System.Windows.Forms.Label resultImageLabel;
         private System.Windows.Forms.Button uploadImageButton;
         private System.Windows.Forms.Button filterImageButton;
+        private System.Windows.Forms.TextBox threadsNumber;
+        private System.Windows.Forms.Label enterThreadsNumber;
     }
 }
 

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System;
 using System.Drawing;
+using System.IO;
 
 
 namespace Fijalkowskim_MedianFilter
@@ -14,7 +15,8 @@ namespace Fijalkowskim_MedianFilter
         static extern int MyProc1(int a, int b);
 
         [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
-        static extern int CppFunc(int a, int b);
+        static extern IntPtr CppMedianFiltering(IntPtr bitmap, int width, int height);
+
 #else
  [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
         static extern int MyProc1(int a, int b);
@@ -26,8 +28,10 @@ namespace Fijalkowskim_MedianFilter
         public TimeSpan currentExecutionTime { get; private set; }
         public TimeSpan previousExecutionTime { get; private set; }
         Stopwatch stopwatch;
-        public Bitmap loadedBitmap { get; set; }
-        
+        public Bitmap loadedBitmap { get; private set; }
+        byte[] loadedBitmapArray;
+        int bitmapSize;
+        int numberOfThreads;
 
         public DataManager()
         {
@@ -36,34 +40,40 @@ namespace Fijalkowskim_MedianFilter
             stopwatch = new Stopwatch();
             loadedBitmap = null;
         }
-        public Bitmap MedianFiltering(Bitmap bitmap)
+        public void LoadBitmap(Bitmap bitmap, int numberOfThreads)
         {
-            Bitmap filteredBitmap = new Bitmap(bitmap.Width, bitmap.Height);
-            for (int y = 0; y < bitmap.Height; y++)
-            {
-                for (int x = 0; x < bitmap.Width; x++)
-                {
-                    Color newColor = Color.FromArgb(0, bitmap.GetPixel(x, y).G, bitmap.GetPixel(x, y).B);
-                    filteredBitmap.SetPixel(x, y, newColor);
-                }
-            }
-            return filteredBitmap;
+            bitmapSize = bitmap.Width * bitmap.Height * 3;
+            this.numberOfThreads = numberOfThreads;
+            loadedBitmap = bitmap;
+            loadedBitmapArray = ArrayFromBitmap(bitmap);
         }
+       
 
-        public int GetResult(int a, int b, DllType dllType)
-        {          
+        public Bitmap UseMedianFilter(DllType dllType)
+        {
+            if (loadedBitmap == null || loadedBitmapArray == null) return null;
+            Bitmap result = new Bitmap(loadedBitmap.Width, loadedBitmap.Height);
             stopwatch.Reset();
-            int result = 0;
             switch (dllType)
             {
                 case DllType.CPP:
+                    IntPtr unmanagedPointer = Marshal.AllocHGlobal(bitmapSize);
+                    Marshal.Copy(loadedBitmapArray, 0, unmanagedPointer, bitmapSize);
+                    IntPtr resultPtr = IntPtr.Zero;
+                    byte[] resultArray = new byte[loadedBitmapArray.Length];
+
                     stopwatch.Start();
-                    result = CppFunc(a, b);
+                    resultPtr = CppMedianFiltering(unmanagedPointer, loadedBitmap.Width, loadedBitmap.Height);
                     stopwatch.Stop();
+                    Marshal.Copy(resultPtr, resultArray, 0, resultArray.Length);
+
+                    Marshal.FreeHGlobal(unmanagedPointer);
+   
+                    result = BitmapFromArray(resultArray, loadedBitmap.Width, loadedBitmap.Height);
                     break;
                 case DllType.ASM:
                     stopwatch.Start();
-                    result =  MyProc1(a, b);
+                    //result =  MyProc1(a, b);
                     stopwatch.Stop();
                     break;
             }
@@ -73,5 +83,43 @@ namespace Fijalkowskim_MedianFilter
 
             return result;
         }
+        #region Conversion methods
+        public byte[] PointerToArray(IntPtr ptr, int size)
+        {
+            byte[] arr = new byte[size];
+            Marshal.Copy(ptr, arr, 0, size);
+            return arr;
+        }
+        public byte[] ArrayFromBitmap(Bitmap bitmap)
+        {
+            byte[] arr = new byte[bitmap.Width * bitmap.Height * 3];
+            int pixel = 0;
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                for (int x = 0; x < bitmap.Width; x++)
+                {
+                    arr[pixel] = bitmap.GetPixel(x, y).R;
+                    arr[pixel + 1] = bitmap.GetPixel(x, y).G;
+                    arr[pixel + 2] = bitmap.GetPixel(x, y).B;
+                    pixel += 3;
+                }
+            }
+            return arr;
+        }
+        public Bitmap BitmapFromArray(byte[] arr, int width, int height)
+        {
+            Bitmap bitmap = new Bitmap(width, height);
+            int pixel = 0;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    bitmap.SetPixel(x, y, Color.FromArgb(arr[pixel], arr[pixel + 1], arr[pixel + 2]));
+                    pixel += 3;
+                }
+            }
+            return bitmap;
+        }
+        #endregion
     }
 }

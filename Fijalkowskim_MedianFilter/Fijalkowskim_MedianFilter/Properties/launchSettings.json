@@ -1,7 +1,8 @@
 {
   "profiles": {
     "Fijalkowskim_MedianFilter": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "nativeDebugging": true
     }
   }
 }
