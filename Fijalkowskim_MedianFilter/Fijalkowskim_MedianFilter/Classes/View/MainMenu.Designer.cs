@@ -45,6 +45,9 @@ namespace Fijalkowskim_MedianFilter
             this.filterImageButton = new System.Windows.Forms.Button();
             this.threadsNumber = new System.Windows.Forms.TextBox();
             this.enterThreadsNumber = new System.Windows.Forms.Label();
+            this.testLabel = new System.Windows.Forms.Label();
+            this.imageLoadingProgress = new System.Windows.Forms.ProgressBar();
+            this.imageLoadedLabel = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.baseImagePreview)).BeginInit();
             this.basePreviewGroup.SuspendLayout();
@@ -213,11 +216,40 @@ namespace Fijalkowskim_MedianFilter
             this.enterThreadsNumber.TabIndex = 21;
             this.enterThreadsNumber.Text = "Enter number of threads (1-64)";
             // 
+            // testLabel
+            // 
+            this.testLabel.AutoSize = true;
+            this.testLabel.Location = new System.Drawing.Point(795, 423);
+            this.testLabel.Name = "testLabel";
+            this.testLabel.Size = new System.Drawing.Size(0, 26);
+            this.testLabel.TabIndex = 22;
+            // 
+            // imageLoadingProgress
+            // 
+            this.imageLoadingProgress.Location = new System.Drawing.Point(46, 582);
+            this.imageLoadingProgress.Name = "imageLoadingProgress";
+            this.imageLoadingProgress.Size = new System.Drawing.Size(403, 23);
+            this.imageLoadingProgress.TabIndex = 23;
+            // 
+            // imageLoadedLabel
+            // 
+            this.imageLoadedLabel.AutoSize = true;
+            this.imageLoadedLabel.Font = new System.Drawing.Font("Roboto Slab", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.imageLoadedLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
+            this.imageLoadedLabel.Location = new System.Drawing.Point(110, 608);
+            this.imageLoadedLabel.Name = "imageLoadedLabel";
+            this.imageLoadedLabel.Size = new System.Drawing.Size(258, 50);
+            this.imageLoadedLabel.TabIndex = 24;
+            this.imageLoadedLabel.Text = "Image loaded";
+            // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1162, 633);
+            this.ClientSize = new System.Drawing.Size(1117, 660);
+            this.Controls.Add(this.imageLoadedLabel);
+            this.Controls.Add(this.imageLoadingProgress);
+            this.Controls.Add(this.testLabel);
             this.Controls.Add(this.enterThreadsNumber);
             this.Controls.Add(this.threadsNumber);
             this.Controls.Add(this.filterImageButton);
@@ -261,6 +293,9 @@ namespace Fijalkowskim_MedianFilter
         private System.Windows.Forms.Button filterImageButton;
         private System.Windows.Forms.TextBox threadsNumber;
         private System.Windows.Forms.Label enterThreadsNumber;
+        private System.Windows.Forms.Label testLabel;
+        private System.Windows.Forms.ProgressBar imageLoadingProgress;
+        private System.Windows.Forms.Label imageLoadedLabel;
     }
 }
 

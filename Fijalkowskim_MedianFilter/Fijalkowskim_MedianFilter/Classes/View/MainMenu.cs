@@ -23,11 +23,15 @@ namespace Fijalkowskim_MedianFilter
 
             currentExecutionTimeLabel.Text = "";
             previousExecutionTimeLabel.Text = "";
+            imageLoadedLabel.Visible = false;
         }
 
 
-        private void uploadImageButton_Click(object sender, EventArgs e)
+        private async void uploadImageButton_Click(object sender, EventArgs e)
         {
+            Bitmap bitmap = null;
+            imageLoadedLabel.Visible = false;
+
             int numberOfThreads;
             try
             {
@@ -46,40 +50,52 @@ namespace Fijalkowskim_MedianFilter
             try
             {
                 OpenFileDialog dialog = new OpenFileDialog();
-                dialog.Filter = "JPG files(*.jpg)|*.jpg|PNG files(*.png)|*.png";
+               // dialog.Filter = "JPG files(*.jpg)|*.jpg;*png|PNG files(*.png)|*.png";
+                dialog.Filter = "Image files (*.jpg;*.png)|*.jpg;*png";
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    Bitmap bitmap = new Bitmap(dialog.FileName);
-                    controller.dataManager.LoadBitmap(bitmap, numberOfThreads);
+                    imageLoadingProgress.Value = 0;
+                    bitmap = new Bitmap(dialog.FileName);
+                    //await controller.dataManager.LoadBitmap(bitmap, numberOfThreads);
+                    Progress<ImageLoadingProgress> progress = new Progress<ImageLoadingProgress>();
+                    progress.ProgressChanged += ReportImageLoadingProgress;
+                    await controller.dataManager.LoadBitmapAsyncV3(bitmap, numberOfThreads, progress);
                     baseImagePreview.Image = bitmap;
+                    imageLoadedLabel.Visible = true;
+
                 }
             }
             catch (Exception)
             {
                 MessageBox.Show("Wrong file selected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            //await controller.dataManager.LoadBitmapAsync(bitmap, numberOfThreads);
 
+        }
+
+        private void ReportImageLoadingProgress(object sender, ImageLoadingProgress e)
+        {
+            imageLoadingProgress.Value = e.percentageDone;
         }
 
         private void filterImageButton_Click(object sender, EventArgs e)
         {               
-            if(controller.dataManager.loadedBitmap != null)
+            if(controller.dataManager.dataLoaded)
             {
                 DllType dllType = selectAsm.Checked ? DllType.ASM : selectCpp.Checked ? DllType.CPP : DllType.CPP;
-                string executionTime = "";
-                string previousExecutionTime = "";
 
-                resultImagePreview.Image = controller.GetFunctionResult(controller.dataManager.loadedBitmap,
-                    dllType, ref executionTime, ref previousExecutionTime);
-
-                currentExecutionTimeLabel.Text = $"Execution time: {executionTime}ms";
-                if (previousExecutionTime != "") previousExecutionTimeLabel.Text = $"Previous execution time: {previousExecutionTime}ms";
+                resultImagePreview.Image = controller.GetFunctionResult(controller.dataManager.loadedBitmap,dllType);
 
             }
             else
             {
                 MessageBox.Show("You must upload an image first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        public void SetExecutionTime(string executionTime, string previousExecutionTime)
+        {
+            currentExecutionTimeLabel.Text = $"Execution time: {executionTime}ms";
+            if (previousExecutionTime != "") previousExecutionTimeLabel.Text = $"Previous execution time: {previousExecutionTime}ms";
         }
 
     }

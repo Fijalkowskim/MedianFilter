@@ -10,14 +10,14 @@ namespace Fijalkowskim_MedianFilter
 
         public Controller() 
         { 
-            dataManager = new DataManager();
+            dataManager = new DataManager(this);
             mainMenu = new MainMenu(this);
         }
-        public Bitmap GetFunctionResult(Bitmap bitmap, DllType dllType, ref string executionTime, ref string previousExecutionTime)
+        public Bitmap GetFunctionResult(Bitmap bitmap, DllType dllType)
         {
             Bitmap result = dataManager.UseMedianFilter(dllType);
-            executionTime = dataManager.currentExecutionTime != TimeSpan.Zero ? dataManager.currentExecutionTime.ToString() : "";
-            previousExecutionTime = dataManager.previousExecutionTime != TimeSpan.Zero ? dataManager.previousExecutionTime.ToString() : "";
+            mainMenu.SetExecutionTime(dataManager.currentExecutionTime != TimeSpan.Zero ? dataManager.currentExecutionTime.ToString() : "", 
+                dataManager.previousExecutionTime != TimeSpan.Zero ? dataManager.previousExecutionTime.ToString() : "");
             return result;
         }
     }
