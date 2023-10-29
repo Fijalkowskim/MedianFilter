@@ -15,7 +15,8 @@ namespace Fijalkowskim_MedianFilter
     {
 #if DEBUG
         [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
-        static extern int MyProc1(int a, int b);
+        static extern byte AsmMedianFilter(byte pixel);
+
 
         [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
         static extern IntPtr CppMedianFiltering(IntPtr bitmap, int width, int height);
@@ -234,12 +235,14 @@ namespace Fijalkowskim_MedianFilter
 
         }
 
-
-        public Bitmap UseMedianFilter(DllType dllType)
+        public async Task<Bitmap> UseMedianFilter(DllType dllType,IProgress<ImageLoadingProgress> progress)
         {
+           
+
             if (loadedBitmap == null || loadedBitmapArray == null) return null;
             Bitmap result = new Bitmap(loadedBitmap.Width, loadedBitmap.Height);
             stopwatch.Reset();
+            ImageLoadingProgress report = new ImageLoadingProgress();
             switch (dllType)
             {
                 case DllType.CPP:
@@ -259,7 +262,20 @@ namespace Fijalkowskim_MedianFilter
                     break;
                 case DllType.ASM:
                     stopwatch.Start();
-                    //result =  MyProc1(a, b);
+                    byte[] resultArr = new byte[RGBbitmapArraySize];
+                    //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
+                    for (int i = 0; i < RGBbitmapArraySize; i++)
+                    {
+                        await Task.Run(() =>
+                        {
+                            resultArr[i] = AsmMedianFilter(loadedBitmapArray[i]);
+                        });
+                        report.percentageDone = (i + 1) * 100 / RGBbitmapArraySize;
+                        progress.Report(report);
+                    }
+
+                    //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
+                    result = BitmapFromArray(resultArr, loadedBitmap.Width, loadedBitmap.Height);
                     stopwatch.Stop();
                     break;
             }

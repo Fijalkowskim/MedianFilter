@@ -78,13 +78,15 @@ namespace Fijalkowskim_MedianFilter
             imageLoadingProgress.Value = e.percentageDone;
         }
 
-        private void filterImageButton_Click(object sender, EventArgs e)
+        private async void filterImageButton_Click(object sender, EventArgs e)
         {               
             if(controller.dataManager.dataLoaded)
             {
                 DllType dllType = selectAsm.Checked ? DllType.ASM : selectCpp.Checked ? DllType.CPP : DllType.CPP;
-
-                resultImagePreview.Image = controller.GetFunctionResult(controller.dataManager.loadedBitmap,dllType);
+                imageLoadingProgress.Value = 0;
+                Progress<ImageLoadingProgress> progress = new Progress<ImageLoadingProgress>();
+                progress.ProgressChanged += ReportImageLoadingProgress;
+                resultImagePreview.Image = await controller.GetFunctionResult(dllType, progress);
 
             }
             else

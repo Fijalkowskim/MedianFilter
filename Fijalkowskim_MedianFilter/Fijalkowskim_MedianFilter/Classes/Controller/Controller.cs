@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 namespace Fijalkowskim_MedianFilter
 {
@@ -13,9 +14,10 @@ namespace Fijalkowskim_MedianFilter
             dataManager = new DataManager(this);
             mainMenu = new MainMenu(this);
         }
-        public Bitmap GetFunctionResult(Bitmap bitmap, DllType dllType)
+
+        public async Task<Bitmap> GetFunctionResult(DllType dllType, IProgress<ImageLoadingProgress> progress)
         {
-            Bitmap result = dataManager.UseMedianFilter(dllType);
+            Bitmap result = await dataManager.UseMedianFilter(dllType, progress);
             mainMenu.SetExecutionTime(dataManager.currentExecutionTime != TimeSpan.Zero ? dataManager.currentExecutionTime.ToString() : "", 
                 dataManager.previousExecutionTime != TimeSpan.Zero ? dataManager.previousExecutionTime.ToString() : "");
             return result;
