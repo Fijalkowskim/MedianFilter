@@ -70,27 +70,23 @@ static unsigned char* FilterBitmapCahnnel(unsigned char* bitmap, int width, int 
 		x = i % width;
 		if (x == 0 && i != 0) y++;
 		if (x == 0 || x == width - 1 || y == 0 || y == height - 1)continue;//Edge handle later
-		int i1 = i - width - 1;
-		int i2 = i - width;
-		int i3 = i - width + 1;
-		int i4 = i - 1;
-		int i5 = i;
-		int i6 = i + 1;
-		int i7 = i + width - 1;
-		int i8 = i + width;
-		int i9 = i + width + 1;
-		unsigned char arr[9];
-		arr[0] = bitmap[i1];
-		arr[1] = bitmap[i2];
-		arr[2] = bitmap[i3];
-		arr[3] = bitmap[i4];
-		arr[4] = bitmap[i5];
-		arr[5] = bitmap[i6];
-		arr[6] = bitmap[i7];
-		arr[7] = bitmap[i8];
-		arr[8] = bitmap[i9];
-		std::sort(std::begin(arr), std::end(arr));
-		result[i] = arr[4];
+		int indexes[9];
+		indexes[0] = i - width - 1;
+		indexes[1] = i - width;
+		indexes[2] = i - width + 1;
+		indexes[3] = i - 1;
+		indexes[4] = i;
+		indexes[5] = i + 1;
+		indexes[6] = i + width - 1;
+		indexes[7] = i + width;
+		indexes[8] = i + width + 1;
+		unsigned char fileredMask[9];
+		for (size_t i = 0; i < 9; i++)
+		{
+			fileredMask[i] = bitmap[indexes[i]];
+		}
+		std::sort(std::begin(fileredMask), std::end(fileredMask));
+		result[i] = fileredMask[4];
 	}
 	return result;
 }

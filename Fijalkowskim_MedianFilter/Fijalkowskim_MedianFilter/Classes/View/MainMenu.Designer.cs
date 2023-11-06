@@ -100,7 +100,7 @@ namespace Fijalkowskim_MedianFilter
             // previousExecutionTimeLabel
             // 
             this.previousExecutionTimeLabel.AutoSize = true;
-            this.previousExecutionTimeLabel.Location = new System.Drawing.Point(502, 469);
+            this.previousExecutionTimeLabel.Location = new System.Drawing.Point(543, 456);
             this.previousExecutionTimeLabel.Name = "previousExecutionTimeLabel";
             this.previousExecutionTimeLabel.Size = new System.Drawing.Size(233, 26);
             this.previousExecutionTimeLabel.TabIndex = 9;
@@ -109,7 +109,7 @@ namespace Fijalkowskim_MedianFilter
             // currentExecutionTimeLabel
             // 
             this.currentExecutionTimeLabel.AutoSize = true;
-            this.currentExecutionTimeLabel.Location = new System.Drawing.Point(502, 423);
+            this.currentExecutionTimeLabel.Location = new System.Drawing.Point(543, 401);
             this.currentExecutionTimeLabel.Name = "currentExecutionTimeLabel";
             this.currentExecutionTimeLabel.Size = new System.Drawing.Size(225, 26);
             this.currentExecutionTimeLabel.TabIndex = 8;
@@ -139,7 +139,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             this.resultPreviewGroup.BackColor = System.Drawing.Color.Silver;
             this.resultPreviewGroup.Controls.Add(this.resultImagePreview);
-            this.resultPreviewGroup.Location = new System.Drawing.Point(580, 36);
+            this.resultPreviewGroup.Location = new System.Drawing.Point(600, 36);
             this.resultPreviewGroup.Name = "resultPreviewGroup";
             this.resultPreviewGroup.Size = new System.Drawing.Size(517, 341);
             this.resultPreviewGroup.TabIndex = 15;
@@ -167,7 +167,7 @@ namespace Fijalkowskim_MedianFilter
             // resultImageLabel
             // 
             this.resultImageLabel.AutoSize = true;
-            this.resultImageLabel.Location = new System.Drawing.Point(580, 7);
+            this.resultImageLabel.Location = new System.Drawing.Point(600, 7);
             this.resultImageLabel.Name = "resultImageLabel";
             this.resultImageLabel.Size = new System.Drawing.Size(147, 26);
             this.resultImageLabel.TabIndex = 17;
@@ -175,7 +175,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             // uploadImageButton
             // 
-            this.uploadImageButton.Location = new System.Drawing.Point(44, 516);
+            this.uploadImageButton.Location = new System.Drawing.Point(33, 554);
             this.uploadImageButton.Margin = new System.Windows.Forms.Padding(5);
             this.uploadImageButton.Name = "uploadImageButton";
             this.uploadImageButton.Size = new System.Drawing.Size(190, 58);
@@ -186,7 +186,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             // filterImageButton
             // 
-            this.filterImageButton.Location = new System.Drawing.Point(259, 516);
+            this.filterImageButton.Location = new System.Drawing.Point(259, 554);
             this.filterImageButton.Margin = new System.Windows.Forms.Padding(5);
             this.filterImageButton.Name = "filterImageButton";
             this.filterImageButton.Size = new System.Drawing.Size(190, 58);
@@ -198,7 +198,7 @@ namespace Fijalkowskim_MedianFilter
             // threadsNumber
             // 
             this.threadsNumber.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.threadsNumber.Location = new System.Drawing.Point(336, 485);
+            this.threadsNumber.Location = new System.Drawing.Point(359, 502);
             this.threadsNumber.MaxLength = 2;
             this.threadsNumber.Name = "threadsNumber";
             this.threadsNumber.PlaceholderText = "1";
@@ -210,7 +210,7 @@ namespace Fijalkowskim_MedianFilter
             // enterThreadsNumber
             // 
             this.enterThreadsNumber.AutoSize = true;
-            this.enterThreadsNumber.Location = new System.Drawing.Point(44, 485);
+            this.enterThreadsNumber.Location = new System.Drawing.Point(33, 502);
             this.enterThreadsNumber.Name = "enterThreadsNumber";
             this.enterThreadsNumber.Size = new System.Drawing.Size(286, 26);
             this.enterThreadsNumber.TabIndex = 21;
@@ -226,7 +226,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             // imageLoadingProgress
             // 
-            this.imageLoadingProgress.Location = new System.Drawing.Point(46, 582);
+            this.imageLoadingProgress.Location = new System.Drawing.Point(33, 640);
             this.imageLoadingProgress.Name = "imageLoadingProgress";
             this.imageLoadingProgress.Size = new System.Drawing.Size(403, 23);
             this.imageLoadingProgress.TabIndex = 23;
@@ -236,7 +236,7 @@ namespace Fijalkowskim_MedianFilter
             this.imageLoadedLabel.AutoSize = true;
             this.imageLoadedLabel.Font = new System.Drawing.Font("Roboto Slab", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.imageLoadedLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
-            this.imageLoadedLabel.Location = new System.Drawing.Point(110, 608);
+            this.imageLoadedLabel.Location = new System.Drawing.Point(84, 666);
             this.imageLoadedLabel.Name = "imageLoadedLabel";
             this.imageLoadedLabel.Size = new System.Drawing.Size(258, 50);
             this.imageLoadedLabel.TabIndex = 24;
@@ -246,7 +246,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1117, 660);
+            this.ClientSize = new System.Drawing.Size(1376, 767);
             this.Controls.Add(this.imageLoadedLabel);
             this.Controls.Add(this.imageLoadingProgress);
             this.Controls.Add(this.testLabel);
