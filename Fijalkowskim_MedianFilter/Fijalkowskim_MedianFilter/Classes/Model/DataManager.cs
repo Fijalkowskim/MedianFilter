@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System;
 using System.Threading;
 using System.Drawing;
+using System.Numerics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -33,15 +34,16 @@ namespace Fijalkowskim_MedianFilter
         public TimeSpan previousExecutionTime { get; private set; }
         public bool dataLoaded { get; private set; }
         Stopwatch stopwatch;
-        public Bitmap loadedBitmap { get; private set; }
-        byte[] loadedBitmapArray;
-        int RGBbitmapArraySize;
-        int bitmapSize;
-        int numberOfThreads;
+        public Bitmap bitmap { get; private set; }
+        byte[,] expandedBitmapR, expandedBitmapG, expandedBitmapB;
+        byte[] bitmap1DArray;
+        int bitmapRGBSize;
+        int colorChannelSize;
+        int numberOfTasks;
+        TaskData[] tasksData;
+        int[] taskRanges;
 
         static readonly object arrayLock = new object();
-        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
-
 
         Controller controller;
 
@@ -51,24 +53,158 @@ namespace Fijalkowskim_MedianFilter
             currentExecutionTime = TimeSpan.Zero;
             previousExecutionTime = TimeSpan.Zero;
             stopwatch = new Stopwatch();
-            loadedBitmap = null;
+            bitmap = null;
             dataLoaded = false;
         }
 
-        public async Task LoadBitmap(Bitmap bitmap, int numberOfThreads)
-        {
+        public async Task LoadBitmap(Bitmap bitmap, int numberOfTasks)
+        {        
             stopwatch.Restart();
             stopwatch.Start();
 
-            RGBbitmapArraySize = bitmap.Width * bitmap.Height * 3;
-            this.numberOfThreads = numberOfThreads;
-            loadedBitmapArray = await Task.Run(()=> ArrayFromBitmap(bitmap));
+            bitmapRGBSize = bitmap.Width * bitmap.Height * 3;
+            colorChannelSize = bitmap.Width * bitmap.Height;
+            this.numberOfTasks = Math.Min(numberOfTasks, bitmapRGBSize);
+            this.bitmap = bitmap;
+            //CalculateExpandedBitmap();
+            SetUpTasks();
+            CalculateTaskData();
+            LoadBitmapStripe();
+
+            Bitmap bmp = BitmapFromTaskData(tasksData[0]);
+            controller.mainMenu.SetFilteredBitmap(bmp);
+
+           // bitmap1DArray = await Task.Run(()=> ArrayFromBitmap(bitmap));
 
             stopwatch.Stop();
             controller.mainMenu.SetExecutionTime(stopwatch.Elapsed.ToString(), "");
 
-            loadedBitmap = bitmap;
             dataLoaded = true;
+        }
+        void SetUpTasks()
+        {
+            tasksData = new TaskData[numberOfTasks];
+            taskRanges = new int[numberOfTasks];
+            int taskBitmapRange = colorChannelSize / numberOfTasks;
+            int undvidedRange = colorChannelSize - numberOfTasks * taskBitmapRange;
+            for (int i = 0; i < numberOfTasks; i++)
+            {
+                taskRanges[i] = taskBitmapRange;
+                tasksData[i] = new TaskData();
+                tasksData[i].bitmapStripeR = new List<byte>();
+                tasksData[i].bitmapStripeG = new List<byte>();
+                tasksData[i].bitmapStripeB = new List<byte>();
+                if (undvidedRange != 0)
+                {
+                    taskRanges[i]++;
+                    undvidedRange--;
+                }
+            }
+            
+        }
+        void CalculateTaskData()
+        {
+            int currentIndex = 0;
+            int endIndex;
+            for (int i = 0; i < numberOfTasks; i++)
+            {
+                endIndex = currentIndex + taskRanges[i];
+
+                int length = endIndex - currentIndex;
+
+                int startX = currentIndex % bitmap.Width;
+                int startY = currentIndex / bitmap.Width;
+                tasksData[i].startPos = new Vector2(startX, startY);
+
+                int count = 0;
+                for (int y = startY; y < bitmap.Height; y++)
+                {
+                    for (int x = y == startY ? startX : 0; x < bitmap.Width; x++)
+                    {
+                        count++;
+
+                        if (count == length)
+                        {
+                            tasksData[i].endPos = new Vector2(x, y);
+                            y = bitmap.Height;
+                            break;
+                        }
+                    }
+                }
+                currentIndex = endIndex;
+            }
+        }
+        void LoadBitmapStripe()
+        {
+            int currThread = 0;
+            Vector2 startPos, endPos;
+            endPos = new Vector2(tasksData[currThread].endPos.X + 1 + 1, tasksData[currThread].endPos.Y + 1 + 1);
+
+            for (int y = 0; y < bitmap.Height + 2; y++)
+            {
+                for (int x = 0; x < bitmap.Width + 2; x++)
+                {
+                    tasksData[currThread].bitmapStripeR.Add(expandedBitmapR[x, y]);
+                    tasksData[currThread].bitmapStripeG.Add(expandedBitmapG[x, y]);
+                    tasksData[currThread].bitmapStripeB.Add(expandedBitmapB[x, y]);
+                    if (x == endPos.X && y == endPos.Y)
+                    {
+                        currThread++;
+                        if (currThread == numberOfTasks)
+                            return;
+                        startPos = new Vector2(tasksData[currThread].startPos.X + 1 - 1, tasksData[currThread].startPos.Y + 1 - 1);
+                        endPos = new Vector2(tasksData[currThread].endPos.X + 1 + 1, tasksData[currThread].endPos.Y + 1 + 1);
+                        y = (int)startPos.Y;
+                        x = (int)startPos.X;
+                    }
+                }
+            }
+            
+        }
+        Bitmap BitmapFromTaskData(TaskData taskData)
+        {
+            Bitmap bmp = new Bitmap(bitmap.Width, bitmap.Height);
+            int idx = 0;
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                for (int x = 0; x < bitmap.Width; x++)
+                {
+                    if(x >= taskData.startPos.X && x <= taskData.endPos.X && y >= taskData.startPos.Y && y <= taskData.endPos.Y)
+                    {
+                        bmp.SetPixel(x,y,Color.FromArgb(taskData.bitmapStripeR[idx], taskData.bitmapStripeG[idx], taskData.bitmapStripeB[idx]));
+                        idx++;
+                    }
+                    else
+                    {
+                        bmp.SetPixel(x, y, Color.FromArgb(0, 0, 0));
+                    }
+                }
+            }
+            return bmp;
+        }
+        void CalculateExpandedBitmap()
+        {
+            expandedBitmapR = new byte[bitmap.Width + 2, bitmap.Height + 2];
+            expandedBitmapG = new byte[bitmap.Width + 2, bitmap.Height + 2];
+            expandedBitmapB = new byte[bitmap.Width + 2, bitmap.Height + 2];
+            for (int y = 0; y < bitmap.Height + 2; y++)
+            {
+                for (int x = 0; x < bitmap.Width + 2; x++)
+                {
+                    if (x == 0 || y == 0 || x == bitmap.Width + 1 || y == bitmap.Height + 1)
+                    {
+                        expandedBitmapR[x, y] = 0;
+                        expandedBitmapG[x, y] = 0;
+                        expandedBitmapB[x, y] = 0;
+                    }
+                    else
+                    {
+                        expandedBitmapR[x, y] = bitmap.GetPixel(x - 1, y - 1).R;
+                        expandedBitmapG[x, y] = bitmap.GetPixel(x - 1, y - 1).G;
+                        expandedBitmapB[x, y] = bitmap.GetPixel(x - 1, y - 1).B;
+                    }
+                }
+            }
         }
         public async Task LoadBitmapAsyncV3(Bitmap bitmap, int numberOfThreads, IProgress<ImageLoadingProgress> progress)
         {
@@ -78,22 +214,22 @@ namespace Fijalkowskim_MedianFilter
 
             ImageLoadingProgress report = new ImageLoadingProgress();
 
-            RGBbitmapArraySize = bitmap.Width * bitmap.Height * 3;
-            bitmapSize = bitmap.Width * bitmap.Height;
+            bitmapRGBSize = bitmap.Width * bitmap.Height * 3;
+            colorChannelSize = bitmap.Width * bitmap.Height;
 
-            this.numberOfThreads = numberOfThreads;
-            int taskBitmapRange = bitmapSize / numberOfThreads;
+            this.numberOfTasks = numberOfThreads;
+            int taskBitmapRange = colorChannelSize / numberOfThreads;
 
-            loadedBitmapArray = new byte[RGBbitmapArraySize];
+            bitmap1DArray = new byte[bitmapRGBSize];
 
             int currentIndex = 0;
             int endIndex;
             int pasteFromIndex = 0;
             for (int i = 0; i < numberOfThreads; i++)
             {
-                endIndex = i == numberOfThreads - 1 ? bitmapSize : currentIndex + taskBitmapRange;
+                endIndex = i == numberOfThreads - 1 ? colorChannelSize : currentIndex + taskBitmapRange;
                 BitmapRGBArrayPart RGBArray = await Task.Run(() => ArrayFromBitmapAsync(bitmap, currentIndex, endIndex, pasteFromIndex, i));
-                Array.Copy(RGBArray.arr, 0, loadedBitmapArray, RGBArray.pasteIndex, RGBArray.arr.Length);
+                Array.Copy(RGBArray.arr, 0, bitmap1DArray, RGBArray.pasteIndex, RGBArray.arr.Length);
                 currentIndex = endIndex;
                 pasteFromIndex += taskBitmapRange * 3;
 
@@ -103,107 +239,11 @@ namespace Fijalkowskim_MedianFilter
             stopwatch.Stop();
             controller.mainMenu.SetExecutionTime(stopwatch.Elapsed.ToString(), "");
 
-            loadedBitmap = bitmap;
+            this.bitmap = bitmap;
             dataLoaded = true;
 
         }
-        public async Task LoadBitmapAsync(Bitmap bitmap, int numberOfThreads, IProgress<ImageLoadingProgress> progress)
-        {  
-            dataLoaded = false;
-            stopwatch.Restart();
-            stopwatch.Start();
 
-            ImageLoadingProgress report = new ImageLoadingProgress();
-
-            RGBbitmapArraySize = bitmap.Width * bitmap.Height * 3;
-            bitmapSize = bitmap.Width * bitmap.Height;
-
-            this.numberOfThreads = numberOfThreads;
-            int taskBitmapRange = bitmapSize / numberOfThreads;
-
-            loadedBitmapArray = new byte[RGBbitmapArraySize];
-            List<Task<BitmapRGBArrayPart>> tasks = new List<Task<BitmapRGBArrayPart>>();
-            List<BitmapRGBArrayPart> testArr = new List<BitmapRGBArrayPart>();
-            
-            int currentIndex = 0;
-            int endIndex;
-            int pasteFromIndex = 0;
-            for (int i = 0; i < numberOfThreads; i++)
-            {
-                endIndex = i == numberOfThreads - 1 ? bitmapSize: currentIndex + taskBitmapRange;
-                tasks.Add(Task.Run(() => ArrayFromBitmapAsync(bitmap, currentIndex, endIndex, pasteFromIndex, i)));
-                currentIndex = endIndex;
-                pasteFromIndex += taskBitmapRange * 3;
-
-                report.percentageDone = (i + 1)*100 / numberOfThreads;
-                progress.Report(report);
-            }
-            var results = await Task.WhenAll(tasks);
-            foreach (var item in results)
-            {
-                if (item == null)continue;
-
-                //Array.Copy(item.arr, 0, loadedBitmapArray, item.pasteIndex, item.arr.Length);
-                await semaphore.WaitAsync();
-                try
-                {
-                    Array.Copy(item.arr, 0, loadedBitmapArray, item.pasteIndex, item.arr.Length);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            }
-
-            stopwatch.Stop();
-            controller.mainMenu.SetExecutionTime(stopwatch.Elapsed.ToString(), "");
-
-            loadedBitmap = bitmap;
-            dataLoaded = true;
-
-        }
-        public async Task LoadBitmapAsyncV2(Bitmap bitmap, int numberOfThreads, IProgress<ImageLoadingProgress> progress)
-        {
-            dataLoaded = false;
-            stopwatch.Restart();
-            stopwatch.Start();
-            ImageLoadingProgress report = new ImageLoadingProgress();
-
-            RGBbitmapArraySize = bitmap.Width * bitmap.Height * 3;
-            bitmapSize = bitmap.Width * bitmap.Height;
-
-            this.numberOfThreads = numberOfThreads;
-            int taskBitmapRange = bitmapSize / numberOfThreads;
-
-            loadedBitmapArray = new byte[RGBbitmapArraySize];
-            List<Task<BitmapRGBArrayPart>> tasks = new List<Task<BitmapRGBArrayPart>>();
-            List<BitmapRGBArrayPart> testArr = new List<BitmapRGBArrayPart>();
-
-            int currentIndex = 0;
-            int endIndex;
-            int pasteFromIndex = 0;
-            await Task.Run(() =>
-            {
-                Parallel.For(0, numberOfThreads, i =>
-                 {
-                     endIndex = i == numberOfThreads - 1 ? bitmapSize : currentIndex + taskBitmapRange;
-                     BitmapRGBArrayPart arr = ArrayFromBitmapAsync(bitmap, currentIndex, endIndex, pasteFromIndex, i);
-                     Array.Copy(arr.arr, 0, loadedBitmapArray, arr.pasteIndex, arr.arr.Length);
-                     currentIndex = endIndex;
-                     pasteFromIndex += taskBitmapRange * 3;
-
-                     report.percentageDone = (i + 1) * 100 / numberOfThreads;
-                     progress.Report(report);
-                 });
-            });
-
-            stopwatch.Stop();
-            controller.mainMenu.SetExecutionTime(stopwatch.Elapsed.ToString(), "");
-
-            loadedBitmap = bitmap;
-            dataLoaded = true;
-
-        }
         public BitmapRGBArrayPart ArrayFromBitmapAsync(Bitmap bitmap, int startIndex, int endIndex, int pasteFromIndex, int taskNo)
         {
             if (startIndex >= endIndex) return null;
@@ -239,43 +279,43 @@ namespace Fijalkowskim_MedianFilter
         {
            
 
-            if (loadedBitmap == null || loadedBitmapArray == null) return null;
-            Bitmap result = new Bitmap(loadedBitmap.Width, loadedBitmap.Height);
+            if (bitmap == null || bitmap1DArray == null) return null;
+            Bitmap result = new Bitmap(bitmap.Width, bitmap.Height);
             stopwatch.Reset();
             ImageLoadingProgress report = new ImageLoadingProgress();
             switch (dllType)
             {
                 case DllType.CPP:
-                    IntPtr unmanagedPointer = Marshal.AllocHGlobal(RGBbitmapArraySize);
-                    Marshal.Copy(loadedBitmapArray, 0, unmanagedPointer, RGBbitmapArraySize);
+                    IntPtr unmanagedPointer = Marshal.AllocHGlobal(bitmapRGBSize);
+                    Marshal.Copy(bitmap1DArray, 0, unmanagedPointer, bitmapRGBSize);
                     IntPtr resultPtr = IntPtr.Zero;
-                    byte[] resultArray = new byte[loadedBitmapArray.Length];
+                    byte[] resultArray = new byte[bitmap1DArray.Length];
 
                     stopwatch.Start();
-                    resultPtr = CppMedianFiltering(unmanagedPointer, loadedBitmap.Width, loadedBitmap.Height);
+                    resultPtr = CppMedianFiltering(unmanagedPointer, bitmap.Width, bitmap.Height);
                     stopwatch.Stop();
                     Marshal.Copy(resultPtr, resultArray, 0, resultArray.Length);
 
                     Marshal.FreeHGlobal(unmanagedPointer);
    
-                    result = BitmapFromArray(resultArray, loadedBitmap.Width, loadedBitmap.Height);
+                    result = BitmapFromArray(resultArray, bitmap.Width, bitmap.Height);
                     break;
                 case DllType.ASM:
                     stopwatch.Start();
-                    byte[] resultArr = new byte[RGBbitmapArraySize];
+                    byte[] resultArr = new byte[bitmapRGBSize];
                     //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
-                    for (int i = 0; i < RGBbitmapArraySize; i++)
+                    for (int i = 0; i < bitmapRGBSize; i++)
                     {
                         await Task.Run(() =>
                         {
-                            resultArr[i] = AsmMedianFilter(loadedBitmapArray[i]);
+                            resultArr[i] = AsmMedianFilter(bitmap1DArray[i]);
                         });
-                        report.percentageDone = (i + 1) * 100 / RGBbitmapArraySize;
+                        report.percentageDone = (i + 1) * 100 / bitmapRGBSize;
                         progress.Report(report);
                     }
 
                     //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
-                    result = BitmapFromArray(resultArr, loadedBitmap.Width, loadedBitmap.Height);
+                    result = BitmapFromArray(resultArr, bitmap.Width, bitmap.Height);
                     stopwatch.Stop();
                     break;
             }

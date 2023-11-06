@@ -56,10 +56,10 @@ namespace Fijalkowskim_MedianFilter
                 {
                     imageLoadingProgress.Value = 0;
                     bitmap = new Bitmap(dialog.FileName);
-                    //await controller.dataManager.LoadBitmap(bitmap, numberOfThreads);
+                    await controller.dataManager.LoadBitmap(bitmap, numberOfThreads);
                     Progress<ImageLoadingProgress> progress = new Progress<ImageLoadingProgress>();
                     progress.ProgressChanged += ReportImageLoadingProgress;
-                    await controller.dataManager.LoadBitmapAsyncV3(bitmap, numberOfThreads, progress);
+                    //await controller.dataManager.LoadBitmapAsyncV3(bitmap, numberOfThreads, progress);
                     baseImagePreview.Image = bitmap;
                     imageLoadedLabel.Visible = true;
 
@@ -98,6 +98,10 @@ namespace Fijalkowskim_MedianFilter
         {
             currentExecutionTimeLabel.Text = $"Execution time: {executionTime}ms";
             if (previousExecutionTime != "") previousExecutionTimeLabel.Text = $"Previous execution time: {previousExecutionTime}ms";
+        }
+        public void SetFilteredBitmap(Bitmap bitmap)
+        {
+            resultImagePreview.Image = bitmap;
         }
 
     }

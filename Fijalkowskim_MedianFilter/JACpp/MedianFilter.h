@@ -90,4 +90,25 @@ static unsigned char* FilterBitmapCahnnel(unsigned char* bitmap, int width, int 
 	}
 	return result;
 }
+extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char* stripe, int startX, int startY, int endX, int endY, int stripeLength, int bitmapWidth,int bitmapHeight)
+{
+	unsigned char* result = new unsigned char[stripeLength];
+	int indexes[9];
+	int x, y;
+	x = startX;
+	y = startY;
+	for (int i = 0; i < stripeLength; i++)
+	{
+		indexes[0] = i - bitmapWidth - 1;
+		indexes[1] = i - bitmapWidth;
+		indexes[2] = i - bitmapWidth + 1;
+		indexes[3] = i - 1;
+		indexes[4] = i;
+		indexes[5] = i + 1;
+		indexes[6] = i + bitmapWidth - 1;
+		indexes[7] = i + bitmapWidth;
+		indexes[8] = i + bitmapWidth + 1;
+	}
 
+	return result;
+}
