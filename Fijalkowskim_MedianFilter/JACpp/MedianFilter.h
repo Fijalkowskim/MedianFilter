@@ -90,14 +90,42 @@ static unsigned char* FilterBitmapCahnnel(unsigned char* bitmap, int width, int 
 	}
 	return result;
 }
-extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char* stripe, int startX, int startY, int endX, int endY, int stripeLength, int bitmapWidth,int bitmapHeight)
+extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char* stripe, int bitmapWidth, int rows, int startRow)
 {
-	unsigned char* result = new unsigned char[stripeLength];
+	unsigned char* result = new unsigned char[rows * bitmapWidth];
 	int indexes[9];
-	int x, y;
-	x = startX;
-	y = startY;
-	for (int i = 0; i < stripeLength; i++)
+	unsigned char fileredMask[9];
+	int resultIndex = 0;
+	int stripeIndex = bitmapWidth;
+	for (int y = 0; y < rows; y++)
+	{
+		for (int x = 0; x < bitmapWidth; x++)
+		{
+			indexes[0] = stripeIndex - bitmapWidth - 1;
+			indexes[1] = stripeIndex - bitmapWidth;
+			indexes[2] = stripeIndex - bitmapWidth + 1;
+			indexes[3] = stripeIndex - 1;
+			indexes[4] = stripeIndex;
+			indexes[5] = stripeIndex + 1;
+			indexes[6] = stripeIndex + bitmapWidth - 1;
+			indexes[7] = stripeIndex + bitmapWidth;
+			indexes[8] = stripeIndex + bitmapWidth + 1;
+
+			for (size_t i = 0; i < 9; i++)
+			{
+				bool leftEdge = x == 0 && (i == 0 || i == 3 || i == 6);
+				bool rightEdge = x == bitmapWidth - 1 && (i == 2 || i == 5 || i == 8);
+
+				fileredMask[i] = leftEdge || rightEdge ? 0 : stripe[indexes[i]];
+			}
+			std::sort(std::begin(fileredMask), std::end(fileredMask));
+			result[resultIndex] = fileredMask[4];
+
+			stripeIndex++;
+			resultIndex++;
+		}
+	}
+	/*for (int i = 0; i < bitmapWidth; i++)
 	{
 		indexes[0] = i - bitmapWidth - 1;
 		indexes[1] = i - bitmapWidth;
@@ -108,7 +136,7 @@ extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char
 		indexes[6] = i + bitmapWidth - 1;
 		indexes[7] = i + bitmapWidth;
 		indexes[8] = i + bitmapWidth + 1;
-	}
+	}*/
 
 	return result;
 }

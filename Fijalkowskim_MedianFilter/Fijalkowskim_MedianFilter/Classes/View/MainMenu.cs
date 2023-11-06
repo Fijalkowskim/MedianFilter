@@ -16,6 +16,8 @@ namespace Fijalkowskim_MedianFilter
     public partial class MainMenu : Form
     {
         Controller controller;
+        float filterCooldown = 100f;
+        Stopwatch stopwatch;
         public MainMenu(Controller controller)
         {
             InitializeComponent();
@@ -24,29 +26,22 @@ namespace Fijalkowskim_MedianFilter
             currentExecutionTimeLabel.Text = "";
             previousExecutionTimeLabel.Text = "";
             imageLoadedLabel.Visible = false;
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
         }
 
 
-        private async void uploadImageButton_Click(object sender, EventArgs e)
+        private void uploadImageButton_Click(object sender, EventArgs e)
         {
+            if(controller.dataManager.applyingFilter)
+            {
+                MessageBox.Show("Wait till last process finishes", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             Bitmap bitmap = null;
             imageLoadedLabel.Visible = false;
 
-            int numberOfThreads;
-            try
-            {
-                numberOfThreads = Int32.Parse(threadsNumber.Text);
-            }
-            catch (FormatException)
-            {
-                MessageBox.Show("Enter a number of threads between 1 and 64", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            if (numberOfThreads < 1 || numberOfThreads > 64)
-            {
-                MessageBox.Show("Enter a number of threads between 1 and 64", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); 
-                return; 
-            }
+            
             try
             {
                 OpenFileDialog dialog = new OpenFileDialog();
@@ -56,10 +51,7 @@ namespace Fijalkowskim_MedianFilter
                 {
                     imageLoadingProgress.Value = 0;
                     bitmap = new Bitmap(dialog.FileName);
-                    await controller.dataManager.LoadBitmap(bitmap, numberOfThreads);
-                    Progress<ImageLoadingProgress> progress = new Progress<ImageLoadingProgress>();
-                    progress.ProgressChanged += ReportImageLoadingProgress;
-                    //await controller.dataManager.LoadBitmapAsyncV3(bitmap, numberOfThreads, progress);
+                    controller.dataManager.LoadBitmap(bitmap);
                     baseImagePreview.Image = bitmap;
                     imageLoadedLabel.Visible = true;
 
@@ -79,14 +71,36 @@ namespace Fijalkowskim_MedianFilter
         }
 
         private async void filterImageButton_Click(object sender, EventArgs e)
-        {               
-            if(controller.dataManager.dataLoaded)
+        {
+            if(stopwatch.ElapsedMilliseconds < filterCooldown)
+            {
+                MessageBox.Show("Wait a second before filtering again", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            stopwatch.Restart();
+            stopwatch.Start();
+            int numberOfTasks;
+            try
+            {
+                numberOfTasks = Int32.Parse(threadsNumber.Text);
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Enter a number of threads between 1 and 64", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (numberOfTasks < 1 || numberOfTasks > 64)
+            {
+                MessageBox.Show("Enter a number of threads between 1 and 64", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (controller.dataManager.dataLoaded)
             {
                 DllType dllType = selectAsm.Checked ? DllType.ASM : selectCpp.Checked ? DllType.CPP : DllType.CPP;
                 imageLoadingProgress.Value = 0;
                 Progress<ImageLoadingProgress> progress = new Progress<ImageLoadingProgress>();
                 progress.ProgressChanged += ReportImageLoadingProgress;
-                resultImagePreview.Image = await controller.GetFunctionResult(dllType, progress);
+                resultImagePreview.Image = await controller.dataManager.UseMedianFilter(dllType,numberOfTasks, progress);
 
             }
             else

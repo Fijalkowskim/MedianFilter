@@ -21,6 +21,8 @@ namespace Fijalkowskim_MedianFilter
 
         [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
         static extern IntPtr CppMedianFiltering(IntPtr bitmap, int width, int height);
+        [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
+        static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows, int startRow);
 
 #else
  [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
@@ -30,73 +32,117 @@ namespace Fijalkowskim_MedianFilter
         static extern int CppFunc(int a, int b);
 #endif
 
-        public TimeSpan currentExecutionTime { get; private set; }
-        public TimeSpan previousExecutionTime { get; private set; }
+        public long currentExecutionTime { get; private set; }
+        public long previousExecutionTime { get; private set; }
         public bool dataLoaded { get; private set; }
         Stopwatch stopwatch;
-        public Bitmap bitmap { get; private set; }
-        byte[,] expandedBitmapR, expandedBitmapG, expandedBitmapB;
-        byte[] bitmap1DArray;
+        public Bitmap loadedBitmap { get; private set; }
+        int bitmapWidth, bitmapHeight;
         int bitmapRGBSize;
         int colorChannelSize;
         int numberOfTasks;
         TaskData[] tasksData;
-        int[] taskRanges;
-
+        private CancellationTokenSource cancellationTokenSource;
         static readonly object arrayLock = new object();
+        public bool applyingFilter { get; private set; }
 
         Controller controller;
 
         public DataManager(Controller controller)
         {
             this.controller = controller;
-            currentExecutionTime = TimeSpan.Zero;
-            previousExecutionTime = TimeSpan.Zero;
+            currentExecutionTime = -1;
+            previousExecutionTime = -1;
             stopwatch = new Stopwatch();
-            bitmap = null;
+            loadedBitmap = null;
             dataLoaded = false;
+            applyingFilter = false;
         }
 
-        public async Task LoadBitmap(Bitmap bitmap, int numberOfTasks)
+        public void LoadBitmap(Bitmap bitmap)
         {        
-            stopwatch.Restart();
-            stopwatch.Start();
-
             bitmapRGBSize = bitmap.Width * bitmap.Height * 3;
             colorChannelSize = bitmap.Width * bitmap.Height;
-            this.numberOfTasks = Math.Min(numberOfTasks, bitmapRGBSize);
-            this.bitmap = bitmap;
-            //CalculateExpandedBitmap();
-            SetUpTasks();
-            CalculateTaskData();
-            LoadBitmapStripe();
-
-            Bitmap bmp = BitmapFromTaskData(tasksData[0]);
-            controller.mainMenu.SetFilteredBitmap(bmp);
-
-           // bitmap1DArray = await Task.Run(()=> ArrayFromBitmap(bitmap));
-
-            stopwatch.Stop();
-            controller.mainMenu.SetExecutionTime(stopwatch.Elapsed.ToString(), "");
-
+            this.loadedBitmap = bitmap;
+            bitmapHeight = bitmap.Height;
+            bitmapWidth = bitmap.Width;
+            ImageLoadingProgress report = new ImageLoadingProgress();
             dataLoaded = true;
+            
         }
-        void SetUpTasks()
+        BitmapStripeResult ApplyMedianFilterCpp(ref Bitmap bmp, TaskData taskData, int width, int height)
         {
+            int stripeLength = taskData.bitmapStripeR.Count;
+
+            IntPtr ptrR = Marshal.AllocHGlobal(stripeLength);
+            IntPtr ptrG = Marshal.AllocHGlobal(stripeLength);
+            IntPtr ptrB = Marshal.AllocHGlobal(stripeLength);
+            Marshal.Copy(taskData.bitmapStripeR.ToArray(), 0, ptrR, stripeLength);
+            Marshal.Copy(taskData.bitmapStripeG.ToArray(), 0, ptrG, stripeLength);
+            Marshal.Copy(taskData.bitmapStripeB.ToArray(), 0, ptrB, stripeLength);
+            IntPtr resultRptr = IntPtr.Zero;
+            IntPtr resultGptr = IntPtr.Zero;
+            IntPtr resultBptr = IntPtr.Zero;
+
+            byte[] resultArrayR = new byte[stripeLength];
+            byte[] resultArrayG = new byte[stripeLength];
+            byte[] resultArrayB = new byte[stripeLength];
+
+            resultRptr = FilterBitmapStripe(ptrR, width, taskData.rows, taskData.startRow);
+            resultGptr = FilterBitmapStripe(ptrG, width, taskData.rows, taskData.startRow);
+            resultBptr = FilterBitmapStripe(ptrB, width, taskData.rows, taskData.startRow);
+            try
+            {
+                Marshal.Copy(resultRptr, resultArrayR, 0, resultArrayR.Length);
+                Marshal.Copy(resultGptr, resultArrayG, 0, resultArrayG.Length);
+                Marshal.Copy(resultBptr, resultArrayB, 0, resultArrayB.Length);
+            }
+            catch(Exception e)
+            {
+
+            }
+            
+
+            Marshal.FreeHGlobal(ptrR);
+            Marshal.FreeHGlobal(ptrG);
+            Marshal.FreeHGlobal(ptrB);
+
+            return new BitmapStripeResult(resultArrayR, resultArrayG, resultArrayB, taskData.startRow, taskData.rows);
+            //controller.mainMenu.SetFilteredBitmap(bmp);
+            
+        }       
+        void SetBitmapStripe(ref Bitmap bmp, byte[] R, byte[] G, byte[] B, int startRow, int rows)
+        {
+            int idx = 0;
+            for (int y = startRow; y < startRow + rows; y++)
+            {
+                for (int x = 0; x < bitmapWidth; x++)
+                {
+                    lock (arrayLock)
+                    {
+                        bmp.SetPixel(x, y, Color.FromArgb(R[idx], G[idx], B[idx]));
+                    }
+                    idx++;
+                }
+            }
+        }
+        void SetUpTasks(int numberOfTasks)
+        {
+            this.numberOfTasks = Math.Min(numberOfTasks, bitmapHeight);
+
             tasksData = new TaskData[numberOfTasks];
-            taskRanges = new int[numberOfTasks];
-            int taskBitmapRange = colorChannelSize / numberOfTasks;
-            int undvidedRange = colorChannelSize - numberOfTasks * taskBitmapRange;
+            int taskBitmapRange = bitmapHeight / numberOfTasks;
+            int undvidedRange = bitmapHeight - numberOfTasks * taskBitmapRange;
             for (int i = 0; i < numberOfTasks; i++)
             {
-                taskRanges[i] = taskBitmapRange;
                 tasksData[i] = new TaskData();
+                tasksData[i].rows = taskBitmapRange;
                 tasksData[i].bitmapStripeR = new List<byte>();
                 tasksData[i].bitmapStripeG = new List<byte>();
                 tasksData[i].bitmapStripeB = new List<byte>();
                 if (undvidedRange != 0)
                 {
-                    taskRanges[i]++;
+                    tasksData[i].rows++;
                     undvidedRange--;
                 }
             }
@@ -104,144 +150,35 @@ namespace Fijalkowskim_MedianFilter
         }
         void CalculateTaskData()
         {
-            int currentIndex = 0;
-            int endIndex;
+            int startY = 0;
+            int rows = 0;
             for (int i = 0; i < numberOfTasks; i++)
             {
-                endIndex = currentIndex + taskRanges[i];
-
-                int length = endIndex - currentIndex;
-
-                int startX = currentIndex % bitmap.Width;
-                int startY = currentIndex / bitmap.Width;
-                tasksData[i].startPos = new Vector2(startX, startY);
-
-                int count = 0;
-                for (int y = startY; y < bitmap.Height; y++)
+                rows = tasksData[i].rows;
+                tasksData[i].startRow = startY;
+                for (int y = startY - 1; y < startY + rows + 1; y++)
                 {
-                    for (int x = y == startY ? startX : 0; x < bitmap.Width; x++)
+                    if (y < 0 || y >= bitmapHeight)
                     {
-                        count++;
-
-                        if (count == length)
+                        for (int x = 0; x < bitmapWidth; x++)
                         {
-                            tasksData[i].endPos = new Vector2(x, y);
-                            y = bitmap.Height;
-                            break;
+                            tasksData[i].bitmapStripeR.Add(0);
+                            tasksData[i].bitmapStripeG.Add(0);
+                            tasksData[i].bitmapStripeB.Add(0);
+                        }
+                    }
+                    else
+                    {
+                        for (int x = 0; x < bitmapWidth; x++)
+                        {
+                            tasksData[i].bitmapStripeR.Add(loadedBitmap.GetPixel(x,y).R);
+                            tasksData[i].bitmapStripeG.Add(loadedBitmap.GetPixel(x,y).G);
+                            tasksData[i].bitmapStripeB.Add(loadedBitmap.GetPixel(x,y).B);
                         }
                     }
                 }
-                currentIndex = endIndex;
+                startY += rows;
             }
-        }
-        void LoadBitmapStripe()
-        {
-            int currThread = 0;
-            Vector2 startPos, endPos;
-            endPos = new Vector2(tasksData[currThread].endPos.X + 1 + 1, tasksData[currThread].endPos.Y + 1 + 1);
-
-            for (int y = 0; y < bitmap.Height + 2; y++)
-            {
-                for (int x = 0; x < bitmap.Width + 2; x++)
-                {
-                    tasksData[currThread].bitmapStripeR.Add(expandedBitmapR[x, y]);
-                    tasksData[currThread].bitmapStripeG.Add(expandedBitmapG[x, y]);
-                    tasksData[currThread].bitmapStripeB.Add(expandedBitmapB[x, y]);
-                    if (x == endPos.X && y == endPos.Y)
-                    {
-                        currThread++;
-                        if (currThread == numberOfTasks)
-                            return;
-                        startPos = new Vector2(tasksData[currThread].startPos.X + 1 - 1, tasksData[currThread].startPos.Y + 1 - 1);
-                        endPos = new Vector2(tasksData[currThread].endPos.X + 1 + 1, tasksData[currThread].endPos.Y + 1 + 1);
-                        y = (int)startPos.Y;
-                        x = (int)startPos.X;
-                    }
-                }
-            }
-            
-        }
-        Bitmap BitmapFromTaskData(TaskData taskData)
-        {
-            Bitmap bmp = new Bitmap(bitmap.Width, bitmap.Height);
-            int idx = 0;
-            for (int y = 0; y < bitmap.Height; y++)
-            {
-                for (int x = 0; x < bitmap.Width; x++)
-                {
-                    if(x >= taskData.startPos.X && x <= taskData.endPos.X && y >= taskData.startPos.Y && y <= taskData.endPos.Y)
-                    {
-                        bmp.SetPixel(x,y,Color.FromArgb(taskData.bitmapStripeR[idx], taskData.bitmapStripeG[idx], taskData.bitmapStripeB[idx]));
-                        idx++;
-                    }
-                    else
-                    {
-                        bmp.SetPixel(x, y, Color.FromArgb(0, 0, 0));
-                    }
-                }
-            }
-            return bmp;
-        }
-        void CalculateExpandedBitmap()
-        {
-            expandedBitmapR = new byte[bitmap.Width + 2, bitmap.Height + 2];
-            expandedBitmapG = new byte[bitmap.Width + 2, bitmap.Height + 2];
-            expandedBitmapB = new byte[bitmap.Width + 2, bitmap.Height + 2];
-            for (int y = 0; y < bitmap.Height + 2; y++)
-            {
-                for (int x = 0; x < bitmap.Width + 2; x++)
-                {
-                    if (x == 0 || y == 0 || x == bitmap.Width + 1 || y == bitmap.Height + 1)
-                    {
-                        expandedBitmapR[x, y] = 0;
-                        expandedBitmapG[x, y] = 0;
-                        expandedBitmapB[x, y] = 0;
-                    }
-                    else
-                    {
-                        expandedBitmapR[x, y] = bitmap.GetPixel(x - 1, y - 1).R;
-                        expandedBitmapG[x, y] = bitmap.GetPixel(x - 1, y - 1).G;
-                        expandedBitmapB[x, y] = bitmap.GetPixel(x - 1, y - 1).B;
-                    }
-                }
-            }
-        }
-        public async Task LoadBitmapAsyncV3(Bitmap bitmap, int numberOfThreads, IProgress<ImageLoadingProgress> progress)
-        {
-            dataLoaded = false;
-            stopwatch.Restart();
-            stopwatch.Start();
-
-            ImageLoadingProgress report = new ImageLoadingProgress();
-
-            bitmapRGBSize = bitmap.Width * bitmap.Height * 3;
-            colorChannelSize = bitmap.Width * bitmap.Height;
-
-            this.numberOfTasks = numberOfThreads;
-            int taskBitmapRange = colorChannelSize / numberOfThreads;
-
-            bitmap1DArray = new byte[bitmapRGBSize];
-
-            int currentIndex = 0;
-            int endIndex;
-            int pasteFromIndex = 0;
-            for (int i = 0; i < numberOfThreads; i++)
-            {
-                endIndex = i == numberOfThreads - 1 ? colorChannelSize : currentIndex + taskBitmapRange;
-                BitmapRGBArrayPart RGBArray = await Task.Run(() => ArrayFromBitmapAsync(bitmap, currentIndex, endIndex, pasteFromIndex, i));
-                Array.Copy(RGBArray.arr, 0, bitmap1DArray, RGBArray.pasteIndex, RGBArray.arr.Length);
-                currentIndex = endIndex;
-                pasteFromIndex += taskBitmapRange * 3;
-
-                report.percentageDone = (i + 1) * 100 / numberOfThreads;
-                progress.Report(report);
-            }
-            stopwatch.Stop();
-            controller.mainMenu.SetExecutionTime(stopwatch.Elapsed.ToString(), "");
-
-            this.bitmap = bitmap;
-            dataLoaded = true;
-
         }
 
         public BitmapRGBArrayPart ArrayFromBitmapAsync(Bitmap bitmap, int startIndex, int endIndex, int pasteFromIndex, int taskNo)
@@ -275,54 +212,76 @@ namespace Fijalkowskim_MedianFilter
 
         }
 
-        public async Task<Bitmap> UseMedianFilter(DllType dllType,IProgress<ImageLoadingProgress> progress)
+        public async Task<Bitmap> UseMedianFilter(DllType dllType, int numberOfTasks, IProgress<ImageLoadingProgress> progress)
         {
-           
+            if (applyingFilter || loadedBitmap == null) return null;
+            applyingFilter = true;
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+            }
+            cancellationTokenSource = new CancellationTokenSource();
+            SetUpTasks(numberOfTasks);
+            CalculateTaskData();
 
-            if (bitmap == null || bitmap1DArray == null) return null;
-            Bitmap result = new Bitmap(bitmap.Width, bitmap.Height);
-            stopwatch.Reset();
+            List<Task< BitmapStripeResult >> tasks = new List<Task< BitmapStripeResult >>();
+            Bitmap result = new Bitmap(bitmapWidth, bitmapHeight);
             ImageLoadingProgress report = new ImageLoadingProgress();
+            stopwatch.Reset();
+            stopwatch.Start();
             switch (dllType)
             {
                 case DllType.CPP:
-                    IntPtr unmanagedPointer = Marshal.AllocHGlobal(bitmapRGBSize);
-                    Marshal.Copy(bitmap1DArray, 0, unmanagedPointer, bitmapRGBSize);
-                    IntPtr resultPtr = IntPtr.Zero;
-                    byte[] resultArray = new byte[bitmap1DArray.Length];
+                    BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
+                    for (int i = 0; i < numberOfTasks; i++)
+                    {
+                        int taskIndex = i;
+                        tasks.Add(Task.Run(() => {
+                            return ApplyMedianFilterCpp(ref result, tasksData[taskIndex], bitmapWidth, bitmapHeight);
+                            
+                        },cancellationTokenSource.Token));
+                    }
+                    await Task.WhenAll(tasks);
+                    for (int i = 0; i < tasks.Count; i++)
+                    {
+                        report.percentageDone = (i + 1) * 100 / bitmapRGBSize;
+                        progress.Report(report);
+                        if (result == null)
+                            continue;
+                        tasksResults[i] = tasks[i].Result;
 
-                    stopwatch.Start();
-                    resultPtr = CppMedianFiltering(unmanagedPointer, bitmap.Width, bitmap.Height);
-                    stopwatch.Stop();
-                    Marshal.Copy(resultPtr, resultArray, 0, resultArray.Length);
+                        SetBitmapStripe(ref result, tasksResults[i].resultArrayR, tasksResults[i].resultArrayG, tasksResults[i].resultArrayB,
+                            tasksResults[i].startRow, tasksResults[i].rows);
+                    }
+                   
 
-                    Marshal.FreeHGlobal(unmanagedPointer);
-   
-                    result = BitmapFromArray(resultArray, bitmap.Width, bitmap.Height);
+
                     break;
                 case DllType.ASM:
-                    stopwatch.Start();
                     byte[] resultArr = new byte[bitmapRGBSize];
                     //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
                     for (int i = 0; i < bitmapRGBSize; i++)
                     {
                         await Task.Run(() =>
                         {
-                            resultArr[i] = AsmMedianFilter(bitmap1DArray[i]);
+                            //resultArr[i] = AsmMedianFilter(bitmap1DArray[i]);
                         });
                         report.percentageDone = (i + 1) * 100 / bitmapRGBSize;
                         progress.Report(report);
                     }
 
                     //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
-                    result = BitmapFromArray(resultArr, bitmap.Width, bitmap.Height);
-                    stopwatch.Stop();
+                    result = BitmapFromArray(resultArr, bitmapWidth, bitmapHeight);
+                    
                     break;
             }
-            if (currentExecutionTime != TimeSpan.Zero)
+            stopwatch.Stop();
+            if (currentExecutionTime != -1)
                 previousExecutionTime = currentExecutionTime;
-            currentExecutionTime = stopwatch.Elapsed;
-
+            currentExecutionTime = stopwatch.ElapsedMilliseconds;
+            controller.mainMenu.SetExecutionTime(currentExecutionTime.ToString(), previousExecutionTime < 0 ? "" : previousExecutionTime.ToString());
+            applyingFilter = false;
             return result;
         }
         #region Conversion methods

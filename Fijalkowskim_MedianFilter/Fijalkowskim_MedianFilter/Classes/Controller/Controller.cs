@@ -15,12 +15,12 @@ namespace Fijalkowskim_MedianFilter
             mainMenu = new MainMenu(this);
         }
 
-        public async Task<Bitmap> GetFunctionResult(DllType dllType, IProgress<ImageLoadingProgress> progress)
+        /*public async Task<Bitmap> GetFunctionResult(DllType dllType, IProgress<ImageLoadingProgress> progress)
         {
             Bitmap result = await dataManager.UseMedianFilter(dllType, progress);
             mainMenu.SetExecutionTime(dataManager.currentExecutionTime != TimeSpan.Zero ? dataManager.currentExecutionTime.ToString() : "", 
                 dataManager.previousExecutionTime != TimeSpan.Zero ? dataManager.previousExecutionTime.ToString() : "");
             return result;
-        }
+        }*/
     }
 }
