@@ -8,6 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections;
+using System.Runtime.InteropServices;
+using System.Drawing.Imaging;
 
 namespace Fijalkowskim_MedianFilter
 {  
@@ -16,8 +18,7 @@ namespace Fijalkowskim_MedianFilter
     {
 #if DEBUG
         [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
-        static extern byte AsmMedianFilter(byte pixel);
-
+        unsafe static extern void AsmMedianFilter(byte* pixels, int width, int height);
 
         [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
         static extern IntPtr CppMedianFiltering(IntPtr bitmap, int width, int height);
@@ -180,7 +181,6 @@ namespace Fijalkowskim_MedianFilter
                 startY += rows;
             }
         }
-
         public BitmapRGBArrayPart ArrayFromBitmapAsync(Bitmap bitmap, int startIndex, int endIndex, int pasteFromIndex, int taskNo)
         {
             if (startIndex >= endIndex) return null;
@@ -212,7 +212,7 @@ namespace Fijalkowskim_MedianFilter
 
         }
 
-        public async Task<Bitmap> UseMedianFilter(DllType dllType, int numberOfTasks, IProgress<ImageLoadingProgress> progress)
+        unsafe public async Task<Bitmap> UseMedianFilter(DllType dllType, int numberOfTasks, IProgress<ImageLoadingProgress> progress)
         {
             if (applyingFilter || loadedBitmap == null) return null;
             applyingFilter = true;
@@ -233,7 +233,7 @@ namespace Fijalkowskim_MedianFilter
             switch (dllType)
             {
                 case DllType.CPP:
-                    BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
+                    /*BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
                     for (int i = 0; i < numberOfTasks; i++)
                     {
                         int taskIndex = i;
@@ -253,27 +253,69 @@ namespace Fijalkowskim_MedianFilter
 
                         SetBitmapStripe(ref result, tasksResults[i].resultArrayR, tasksResults[i].resultArrayG, tasksResults[i].resultArrayB,
                             tasksResults[i].startRow, tasksResults[i].rows);
-                    }
-                   
-
-
+                    }          */   
                     break;
                 case DllType.ASM:
                     byte[] resultArr = new byte[bitmapRGBSize];
-                    //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
-                    for (int i = 0; i < bitmapRGBSize; i++)
+                    int idx = 0;
+                    /* for (int y = 0; y < bitmapHeight; y++)
+                     {
+                         for (int x = 0; x < bitmapWidth; x++)
+                         {
+                             byte r = loadedBitmap.GetPixel(x, y).R;
+                             byte g = loadedBitmap.GetPixel(x, y).G;
+                             byte b = loadedBitmap.GetPixel(x, y).B;
+
+                             //AsmMedianFilter(ref g);
+                             //AsmMedianFilter(ref b);
+                             resultArr[idx] = r;
+                             resultArr[idx+1] = g;
+                             resultArr[idx+2] = b;
+
+                             idx += 3;
+                         }
+                     }*/
+
+                    byte[] arr = ArrayFromBitmap(loadedBitmap);
+                    fixed (byte* bytePtr = arr)
                     {
-                        await Task.Run(() =>
-                        {
-                            //resultArr[i] = AsmMedianFilter(bitmap1DArray[i]);
-                        });
-                        report.percentageDone = (i + 1) * 100 / bitmapRGBSize;
-                        progress.Report(report);
+                        AsmMedianFilter(bytePtr, loadedBitmap.Width, loadedBitmap.Height);
+                        Marshal.Copy((IntPtr)bytePtr, arr, 0, arr.Length);
+                        result = BitmapFromArray(arr, bitmapWidth, bitmapHeight);
                     }
+                    /*BitmapData bmpData = loadedBitmap.LockBits(new Rectangle(0, 0, bitmapWidth, bitmapHeight),
+                                ImageLockMode.ReadWrite, loadedBitmap.PixelFormat);
+   
+                    try
+                    {
+                        // Pobieramy wskaźnik do danych pikseli
+                        byte* ptr = (byte*)bmpData.Scan0;
+
+                        // Wywołujemy funkcję z DLL przekazując wskaźnik do danych pikseli
+                        AsmMedianFilter(ptr, loadedBitmap.Width, loadedBitmap.Height);
+                    }
+                    finally
+                    {
+                        // Odblokowujemy dane obrazu
+                        loadedBitmap.UnlockBits(bmpData);
+                    }
+*/
+
+                    /* for (int i = 0; i < colorChannelSize; i++)
+                     {
+                         await Task.Run(() =>
+                         {
+                             AsmMedianFilter(bitm)
+
+                             //resultArr[i] = AsmMedianFilter(bitmap1DArray[i]);
+                         });
+                         report.percentageDone = (i + 1) * 100 / bitmapRGBSize;
+                         progress.Report(report);
+                     }*/
 
                     //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
-                    result = BitmapFromArray(resultArr, bitmapWidth, bitmapHeight);
-                    
+                    //result = BitmapFromArray(resultArr, bitmapWidth, bitmapHeight);
+                   //result = loadedBitmap;
                     break;
             }
             stopwatch.Stop();

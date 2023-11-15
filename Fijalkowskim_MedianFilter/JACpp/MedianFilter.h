@@ -125,18 +125,6 @@ extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char
 			resultIndex++;
 		}
 	}
-	/*for (int i = 0; i < bitmapWidth; i++)
-	{
-		indexes[0] = i - bitmapWidth - 1;
-		indexes[1] = i - bitmapWidth;
-		indexes[2] = i - bitmapWidth + 1;
-		indexes[3] = i - 1;
-		indexes[4] = i;
-		indexes[5] = i + 1;
-		indexes[6] = i + bitmapWidth - 1;
-		indexes[7] = i + bitmapWidth;
-		indexes[8] = i + bitmapWidth + 1;
-	}*/
 
 	return result;
 }
