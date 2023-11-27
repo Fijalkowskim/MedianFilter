@@ -17,12 +17,12 @@ namespace Fijalkowskim_MedianFilter
     public class DataManager
     {
 #if DEBUG
-        [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
+        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
         unsafe static extern void AsmMedianFilter(byte* pixels, int width, int height);
 
-        [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
+        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
         static extern IntPtr CppMedianFiltering(IntPtr bitmap, int width, int height);
-        [DllImport(@"D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
+        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll")]
         static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows, int startRow);
 
 #else
@@ -212,7 +212,7 @@ namespace Fijalkowskim_MedianFilter
 
         }
 
-        unsafe public async Task<Bitmap> UseMedianFilter(DllType dllType, int numberOfTasks, IProgress<ImageLoadingProgress> progress)
+         public async Task<Bitmap> UseMedianFilter(DllType dllType, int numberOfTasks, IProgress<ImageLoadingProgress> progress)
         {
             if (applyingFilter || loadedBitmap == null) return null;
             applyingFilter = true;
@@ -233,7 +233,7 @@ namespace Fijalkowskim_MedianFilter
             switch (dllType)
             {
                 case DllType.CPP:
-                    /*BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
+                    BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
                     for (int i = 0; i < numberOfTasks; i++)
                     {
                         int taskIndex = i;
@@ -253,7 +253,7 @@ namespace Fijalkowskim_MedianFilter
 
                         SetBitmapStripe(ref result, tasksResults[i].resultArrayR, tasksResults[i].resultArrayG, tasksResults[i].resultArrayB,
                             tasksResults[i].startRow, tasksResults[i].rows);
-                    }          */   
+                    }            
                     break;
                 case DllType.ASM:
                     byte[] resultArr = new byte[bitmapRGBSize];
@@ -277,11 +277,13 @@ namespace Fijalkowskim_MedianFilter
                      }*/
 
                     byte[] arr = ArrayFromBitmap(loadedBitmap);
+                    unsafe { 
                     fixed (byte* bytePtr = arr)
                     {
                         AsmMedianFilter(bytePtr, loadedBitmap.Width, loadedBitmap.Height);
                         Marshal.Copy((IntPtr)bytePtr, arr, 0, arr.Length);
                         result = BitmapFromArray(arr, bitmapWidth, bitmapHeight);
+                    }
                     }
                     /*BitmapData bmpData = loadedBitmap.LockBits(new Rectangle(0, 0, bitmapWidth, bitmapHeight),
                                 ImageLockMode.ReadWrite, loadedBitmap.PixelFormat);
@@ -315,7 +317,7 @@ namespace Fijalkowskim_MedianFilter
 
                     //AsmMedianFilter(loadedBitmapArray, RGBbitmapArraySize);
                     //result = BitmapFromArray(resultArr, bitmapWidth, bitmapHeight);
-                   //result = loadedBitmap;
+                    //result = loadedBitmap;
                     break;
             }
             stopwatch.Stop();
