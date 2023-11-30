@@ -8,17 +8,13 @@ namespace Fijalkowskim_MedianFilter
 {
     public class BitmapStripeResult
     {
-        public byte[] resultArrayR;
-        public byte[] resultArrayG;
-        public byte[] resultArrayB;
+        public byte[] resultArray;
         public int startRow;
         public int rows;
 
-        public BitmapStripeResult(byte[] resultArrayR, byte[] resultArrayG, byte[] resultArrayB, int startRow, int rows)
+        public BitmapStripeResult(byte[] resultArray, int startRow, int rows)
         {
-            this.resultArrayR = resultArrayR;
-            this.resultArrayG = resultArrayG;
-            this.resultArrayB = resultArrayB;
+            this.resultArray = resultArray;
             this.startRow = startRow;
             this.rows = rows;
         }

@@ -21,13 +21,13 @@ column_loop:
     cmp r11, rdx        ; Sprawdzamy, czy osi¹gnêliœmy koniec wiersza
     jge next_row       ; Jeœli tak, przechodzimy do nastêpnego wiersza
 
-    ; Tutaj dodaj kod obs³ugi piksela na pozycji [rdi + (r8 * rdx + r9) * 4]  
+    ; Tutaj dodaj kod obs³ugi piksela na pozycji [rdi + (r8 * rdx + r9) * 3]  
 
     mov rax, r10        ; rax = r8
     imul rax, rdx      ; rax = r8 * rdx
     add rax, r11        ; rax = r8 * rdx + r9
     imul rax, 3        ; rax = (r8 * rdx + r9) * 3
-    add rax, rcx       ; rax = rcx + (r8 * rdx + r9) * 3
+    add rax, rcx       ; rax = rcx + (r8 * rdx + r9) * 3 (pixel o pozycji (r8 * rdx + r9) * 3 bo rgb )
 
     ; Modyfikacja piksela
     mov bl, 255

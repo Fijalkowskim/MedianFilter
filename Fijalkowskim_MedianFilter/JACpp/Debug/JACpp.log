@@ -1,6 +1,2 @@
-﻿  pch.cpp
-  dllmain.cpp
-  MedianFilter.cpp
-  Generating Code...
-     Creating library D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Debug\JACpp.lib and object D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Debug\JACpp.exp
-  JACpp.vcxproj -> D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Debug\JACpp.dll
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppClean.targets(77,5): warning : The process cannot access the file 'd:\.1 studia\ja\medianfilter\fijalkowskim_medianfilter\jacpp\debug\jacpp.pch' because it is being used by another process.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppCommon.targets(493,5): error MSB3061: Unable to delete file "Debug\JACpp.pch". The process cannot access the file 'D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\JACpp\Debug\JACpp.pch' because it is being used by another process.
