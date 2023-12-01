@@ -12,8 +12,8 @@ namespace Fijalkowskim_MedianFilter
     public class DataManager
     {
 #if DEBUG
-        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll", CallingConvention = CallingConvention.StdCall)]
-        unsafe static extern void AsmMedianFilter(byte* pixels, int width, int height);
+        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
+        unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
 
         [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
         static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
@@ -88,53 +88,56 @@ namespace Fijalkowskim_MedianFilter
             stopwatch.Reset();
             stopwatch.Start();
 
+            BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
+
             switch (dllType)
             {
                 //C++
-                case DllType.CPP:
-                    BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
-
+                case DllType.CPP:                 
                     //Main filtering tasks
                     for (int i = 0; i < numberOfTasks; i++)
                     {
                         int taskIndex = i;
                         tasks.Add(Task.Run(() => {
                          
-                            BitmapStripeResult res = ApplyCppMedianFilter(ref result, tasksData[taskIndex], bitmapWidth * 3, bitmapHeight);
+                            BitmapStripeResult res = ApplyCppMedianFilter(tasksData[taskIndex], bitmapWidth * 3);
                             report.percentageDone = (taskIndex + 1) * 100 / numberOfTasks;
                             progress.Report(report);
                             return res;
 
                         }, cancellationTokenSource.Token));
                     }
-                    await Task.WhenAll(tasks);
-
-                    report.percentageDone = 100;
-                    progress.Report(report);
-
-                    //Combine stripes
-                    for (int i = 0; i < tasks.Count; i++)
-                    {       
-                        if (result == null) continue;     
-                        AddStripeToBitmap(ref result, tasks[i].Result.resultArray, tasks[i].Result.startRow, tasks[i].Result.rows);
-                    }
                     break;
                     //Assembly
                 case DllType.ASM:
-                    byte[] resultArr = new byte[bitmapSize * 3];
-                    int idx = 0;
-                    byte[] arr = ArrayFromBitmap(loadedBitmap);
-                    unsafe
+                    for (int i = 0; i < numberOfTasks; i++)
                     {
-                        fixed (byte* bytePtr = arr)
-                        {
-                            AsmMedianFilter(bytePtr, loadedBitmap.Width, loadedBitmap.Height);
-                            Marshal.Copy((IntPtr)bytePtr, arr, 0, arr.Length);
-                            result = BitmapFromArray(arr, bitmapWidth, bitmapHeight);
-                        }
+                        int taskIndex = i;
+                        tasks.Add(Task.Run(() => {
+
+                            BitmapStripeResult res = ApplyAsmMedianFilter(tasksData[taskIndex], bitmapWidth * 3);
+                            report.percentageDone = (taskIndex + 1) * 100 / numberOfTasks;
+                            progress.Report(report);
+                            return res;
+
+                        }, cancellationTokenSource.Token));
                     }
                     break;
             }
+            await Task.WhenAll(tasks);
+
+            report.percentageDone = 100;
+            progress.Report(report);
+
+            //Combine stripes
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                if (result == null) continue;
+                AddStripeToBitmap(ref result, tasks[i].Result.resultArray, tasks[i].Result.startRow, tasks[i].Result.rows);
+            }
+
+
+
             stopwatch.Stop();
             HandleTimer();
             applyingFilter = false;
@@ -193,10 +196,10 @@ namespace Fijalkowskim_MedianFilter
                 startY += rows;
             }
         }
-        BitmapStripeResult ApplyCppMedianFilter(ref Bitmap bmp, TaskData taskData, int width, int height)
+        BitmapStripeResult ApplyCppMedianFilter(TaskData taskData, int stripeWidth)
         {
             int stripeLength = taskData.bitmapStripe.Count;
-            int resultSize = width * taskData.rows;
+            int resultSize = stripeWidth * taskData.rows;
 
             IntPtr ptr = Marshal.AllocHGlobal(stripeLength);
  
@@ -206,7 +209,7 @@ namespace Fijalkowskim_MedianFilter
 
             byte[] resultArray = null;
 
-            resultPtr = FilterBitmapStripe(ptr, width, taskData.rows);
+            resultPtr = FilterBitmapStripe(ptr, stripeWidth, taskData.rows);
             if (resultPtr != IntPtr.Zero)
             {
                 resultArray = new byte[resultSize];
@@ -220,6 +223,40 @@ namespace Fijalkowskim_MedianFilter
                 }
             }
             Marshal.FreeHGlobal(ptr);
+            return new BitmapStripeResult(resultArray, taskData.startRow, taskData.rows);
+        }
+        BitmapStripeResult ApplyAsmMedianFilter(TaskData taskData, int stripeWidth)
+        {
+            int stripeLength = taskData.bitmapStripe.Count;
+            int resultSize = stripeWidth * taskData.rows;
+            byte[] filteredStripe = new byte[stripeLength];
+            byte[] resultArray = new byte[resultSize];
+
+            unsafe
+            {
+                fixed (byte* bytePtr = taskData.bitmapStripe.ToArray())
+                {
+                    AsmMedianFilter(bytePtr, stripeWidth, taskData.rows);
+                    if (bytePtr != null)
+                    {
+                        try
+                        {
+                            Marshal.Copy((IntPtr)bytePtr, filteredStripe, 0, stripeLength);
+                            int pixelIndex = stripeWidth;
+                            for (int i = 0; i < resultSize; i++)
+                            {
+                                resultArray[i] = filteredStripe[pixelIndex];
+                                pixelIndex++;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+            }      
+
             return new BitmapStripeResult(resultArray, taskData.startRow, taskData.rows);
         }
         void AddStripeToBitmap(ref Bitmap bmp, byte[] arr, int startRow, int rows)

@@ -40,10 +40,6 @@ extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char
 				// - - X
 				// 6 7 8
 				// - - X
-				if (x == bitmapWidth - 4)
-				{
-					int a = 1;
-				}
 				bool rightEdge = x == bitmapWidth - 3 && (i == 2 || i == 5 || i == 8);
 
 				fileredMaskR[i] = leftEdge || rightEdge ? 0 : stripe[indexes[i]];

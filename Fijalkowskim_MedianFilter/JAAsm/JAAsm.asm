@@ -1,35 +1,33 @@
 .code
 AsmMedianFilter proc
-   ; Parametry:
-    ; rcx - wskaŸnik do danych pikseli
-    ; rdx - szerokoœæ obrazu w pikselach
-    ; r8 - wysokoœæ obrazu w pikselach
-    ; r10 - indeks y
-    ; r11 - indeks x
-    ; rax - wskaznik na aktualny element rcx
+    ; Parameters:
+    ; rcx - bitmap stripe 
+    ; rdx - bitmap width
+    ; r8 - number of rows in this stripe
+    ; r10 - y (row)
+    ; r11 - x (column)
+    ; r12 - current pixel index
+    ; rax - current pixel pointer
 
-    ; Przyk³adowa pêtla iteruj¹ca po pikselach
-    mov r10, 0          ; Indeks wiersza
+    mov r10, 0          ; Initialize row
+    mov r12, rdx        ; Initialize start stripe position (bitmapWitdth)
 
 row_loop:
-    cmp r10, r8        ; Sprawdzamy, czy osi¹gnêliœmy koniec obrazu
-    jge end_process    ; Jeœli tak, to koñczymy proces
+    cmp r10, r8        ; Check if we have reached the end of the stirpe
+    jge end_process    ; If so, end the process
 
-    mov r11, 0          ; Indeks kolumny
+    mov r11, 0          ; Initialize column index
 
 column_loop:
-    cmp r11, rdx        ; Sprawdzamy, czy osi¹gnêliœmy koniec wiersza
-    jge next_row       ; Jeœli tak, przechodzimy do nastêpnego wiersza
+    cmp r11, rdx        ; Check if we have reached the end of the row
+    jge next_row       ; If so, move to the next row
 
-    ; Tutaj dodaj kod obs³ugi piksela na pozycji [rdi + (r8 * rdx + r9) * 3]  
+    ; Add pixel processing code at position [rdi + (r8 * rdx + r9) * 3]
 
-    mov rax, r10        ; rax = r8
-    imul rax, rdx      ; rax = r8 * rdx
-    add rax, r11        ; rax = r8 * rdx + r9
-    imul rax, 3        ; rax = (r8 * rdx + r9) * 3
-    add rax, rcx       ; rax = rcx + (r8 * rdx + r9) * 3 (pixel o pozycji (r8 * rdx + r9) * 3 bo rgb )
+    mov rax, r12        
+    add rax, rcx        ; Set current pixel pointer
 
-    ; Modyfikacja piksela
+    ; Modify the pixel
     mov bl, 255
     sub bl, byte ptr [rax]
     mov byte ptr [rax], bl
@@ -42,12 +40,14 @@ column_loop:
     sub bl, byte ptr [rax]
     mov byte ptr [rax], bl
 
-    add r11, 1          ; Inkrementujemy indeks kolumny
-    jmp column_loop    ; Powtarzamy dla kolejnej kolumny
+    add r12, 3          ; Current pixel index += 3
+
+    add r11, 3          ; Increment column index
+    jmp column_loop    ; Repeat for the next column
 
 next_row:
-    add r10, 1          ; Inkrementujemy indeks wiersza
-    jmp row_loop       ; Powtarzamy dla kolejnego wiersza
+    add r10, 1          ; Increment row index
+    jmp row_loop       ; Repeat for the next row
 
 end_process:
     ret
