@@ -1,5 +1,6 @@
 .data
     filteredMaskR DB 9 DUP(?) 
+    maskArray DB 9 DUP(?)
 .code
 AsmMedianFilter proc
     ; Parameters:
@@ -29,46 +30,48 @@ column_loop:
     mov rax, r12
     add rax, rcx
 
-;---------------Calculate 3x3 mask---------------
-    lea rdi, [rsp]              ; Pointer to the array on the stack
+    jmp apply_negative
 
+;---------------Calculate 3x3 mask---------------
+    ;lea rdi, [rsp]              ; Pointer to the array on the stack
+     lea rdi, [maskArray]
     ;-------------------------------------top-left
     cmp r15, 0
     je handle_top_left_edge
-    mov rsi, 0                  
-    sub rsi, rdx
-    sub rsi, 3                  ; rsi = current - width - 3
-    add rsi, rax 
-    movzx r13, byte ptr [rsi]     
+    mov rdi, 0                  
+    sub rdi, rdx
+    sub rdi, 3                  ; rdi = current - width - 3
+    add rdi, rax 
+    movzx r13, byte ptr [rdi]     
 continue_top_left:
     mov [rdi], r13              
     ;-------------------------------------top-center
-    mov rsi, 0                
-    sub rsi, rdx                ; rsi = current - width
-    add rsi, rax    
-    movzx r13, byte ptr [rsi]    
+    mov rdi, 0                
+    sub rdi, rdx                ; rdi = current - width
+    add rdi, rax    
+    movzx r13, byte ptr [rdi]    
     mov [rdi], r13
     ;-------------------------------------top-right
     mov r14, rdx
     sub r14, 3
     cmp r15, r14
     je handle_top_right_edge
-    mov rsi, 0  
+    mov rdi, 0  
                
-    sub rsi, rdx      
-    add rsi, 3                  ; rsi = current - width + 3
-    add rsi, rax     
-    movzx r13, byte ptr [rsi]  
+    sub rdi, rdx      
+    add rdi, 3                  ; rdi = current - width + 3
+    add rdi, rax     
+    movzx r13, byte ptr [rdi]  
 continue_top_right:
     mov [rdi], r13
     ;-------------------------------------middle-left
     cmp r15, 0
     je handle_middle_left_edge
-    mov rsi, 0  
+    mov rdi, 0  
                   
-    sub rsi, 3                  ; rsi = current - 3
-    add rsi, rax  
-    movzx r13, byte ptr [rsi]   
+    sub rdi, 3                  ; rdi = current - 3
+    add rdi, rax  
+    movzx r13, byte ptr [rdi]   
 continue_middle_left:
     mov [rdi], r13
     ;-------------------------------------middle-center
@@ -79,45 +82,46 @@ continue_middle_left:
     sub r14, 3
     cmp r15, r14
     je handle_middle_right_edge
-    mov rsi, 0  
+    mov rdi, 0  
               
-    add rsi, 3                  ; rsi = current + 3
-    add rsi, rax      
-    movzx r13, byte ptr [rsi]  
+    add rdi, 3                  ; rdi = current + 3
+    add rdi, rax      
+    movzx r13, byte ptr [rdi]  
 continue_middle_right:
     mov [rdi], r13
     ;-------------------------------------bottom-left
     cmp r15, 0
     je handle_bottom_left_edge
-    mov rsi, 0  
+    mov rdi, 0  
                    
-    sub rsi, rdx
-    add rsi, 3                  ; rsi = current + width - 3
-    add rsi, rax 
-    movzx r13, byte ptr [rsi]   
+    sub rdi, rdx
+    add rdi, 3                  ; rdi = current + width - 3
+    add rdi, rax 
+    movzx r13, byte ptr [rdi]   
 continue_bottom_left:
     mov [rdi], r13
     ;-------------------------------------bottom-center
-    mov rsi, 0  
+    mov rdi, 0  
                  
-    add rsi, rdx                ; rsi = current + width
-    add rsi, rax   
-    movzx r13, byte ptr [rsi]    
+    add rdi, rdx                ; rdi = current + width
+    add rdi, rax   
+    movzx r13, byte ptr [rdi]    
     mov [rdi], r13
     ;-------------------------------------bottom-right
     mov r14, rdx
     sub r14, 3
     cmp r15, r14
     je handle_bottom_right_edge
-    mov rsi, 0  
+    mov rdi, 0  
                  
-    add rsi, rdx      
-    add rsi, 3                  ; rsi = current + width + 3
-    add rsi, rax   
-    movzx r13, byte ptr [rsi]   
+    add rdi, rdx      
+    add rdi, 3                  ; rdi = current + width + 3
+    add rdi, rax   
+    movzx r13, byte ptr [rdi]   
 continue_bottom_right:
     mov [rdi], r13
 
+next_pixel:
     add r11, 3                  ; Increment column index
     add r12, 3                  ; Increment pixel index
 
@@ -222,6 +226,27 @@ no_swap:
 next_row:
     add r10, 1                  ; Increment row index
     jmp row_loop                ; Repeat for the next row
+
+;--Example------------
+apply_negative:
+mov r9,255
+    sub r9, [rax]
+
+    mov byte ptr [rax], r9b
+
+    inc rax
+     mov r9,255
+    sub r9, [rax]
+
+    mov byte ptr [rax], r9b
+
+    inc rax
+     mov r9,255
+    sub r9, [rax]
+
+    mov byte ptr [rax], r9b
+
+    jmp next_pixel
 
 end_process:
     ret
