@@ -12,10 +12,10 @@ namespace Fijalkowskim_MedianFilter
     public class DataManager
     {
 #if DEBUG
-        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
         unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
 
-        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
         static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
 
 #else

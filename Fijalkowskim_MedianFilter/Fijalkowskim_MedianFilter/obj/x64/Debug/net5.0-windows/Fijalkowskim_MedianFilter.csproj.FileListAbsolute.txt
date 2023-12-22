@@ -54,3 +54,22 @@ D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter
 D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.pdb
 D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.genruntimeconfig.cache
 D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.csproj.AssemblyReference.cache
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\bin\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.exe
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\bin\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.deps.json
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\bin\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.runtimeconfig.json
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\bin\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.runtimeconfig.dev.json
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\bin\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.dll
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\bin\x64\Debug\net5.0-windows\ref\Fijalkowskim_MedianFilter.dll
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\bin\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.pdb
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.csproj.AssemblyReference.cache
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.MainMenu.resources
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.Properties.Resources.resources
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.csproj.GenerateResource.cache
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.GeneratedMSBuildEditorConfig.editorconfig
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.AssemblyInfoInputs.cache
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.AssemblyInfo.cs
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.csproj.CoreCompileInputs.cache
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.dll
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\ref\Fijalkowskim_MedianFilter.dll
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.pdb
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\Fijalkowskim_MedianFilter\obj\x64\Debug\net5.0-windows\Fijalkowskim_MedianFilter.genruntimeconfig.cache
