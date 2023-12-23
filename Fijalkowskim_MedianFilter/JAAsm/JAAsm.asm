@@ -30,101 +30,97 @@ column_loop:
     mov rax, r12
     add rax, rcx
 
-    jmp apply_negative
+    ;jmp next_pixel
+    ;jmp apply_negative
 
 ;---------------Calculate 3x3 mask---------------
-    ;lea rdi, [rsp]              ; Pointer to the array on the stack
-     lea rdi, [maskArray]
+    lea rdi, [maskArray]
     ;-------------------------------------top-left
-    cmp r15, 0
+    cmp r11, 0
     je handle_top_left_edge
-    mov rdi, 0                  
-    sub rdi, rdx
-    sub rdi, 3                  ; rdi = current - width - 3
-    add rdi, rax 
-    movzx r13, byte ptr [rdi]     
+    mov rbx, 0                  
+    sub rbx, rdx
+    sub rbx, 3                  ; rbx = current - width - 3
+    add rbx, rax 
+    movzx r13, byte ptr [rbx]     
 continue_top_left:
-    mov [rdi], r13              
+    mov [rdi], r13       
+    inc rdi
     ;-------------------------------------top-center
-    mov rdi, 0                
-    sub rdi, rdx                ; rdi = current - width
-    add rdi, rax    
-    movzx r13, byte ptr [rdi]    
+    mov rbx, 0                
+    sub rbx, rdx                ; rbx = current - width
+    add rbx, rax    
+    movzx r13, byte ptr [rbx]    
     mov [rdi], r13
+    inc rdi
     ;-------------------------------------top-right
-    mov r14, rdx
-    sub r14, 3
-    cmp r15, r14
+    cmp r11, rdx
     je handle_top_right_edge
-    mov rdi, 0  
+    mov rbx, 0  
                
-    sub rdi, rdx      
-    add rdi, 3                  ; rdi = current - width + 3
-    add rdi, rax     
-    movzx r13, byte ptr [rdi]  
+    sub rbx, rdx      
+    add rbx, 3                  ; rbx = current - width + 3
+    add rbx, rax     
+    movzx r13, byte ptr [rbx]  
 continue_top_right:
     mov [rdi], r13
+    inc rdi
     ;-------------------------------------middle-left
-    cmp r15, 0
+    cmp r11, 0
     je handle_middle_left_edge
-    mov rdi, 0  
+    mov rbx, 0  
                   
-    sub rdi, 3                  ; rdi = current - 3
-    add rdi, rax  
-    movzx r13, byte ptr [rdi]   
+    sub rbx, 3                  ; rbx = current - 3
+    add rbx, rax  
+    movzx r13, byte ptr [rbx]   
 continue_middle_left:
     mov [rdi], r13
+    inc rdi
     ;-------------------------------------middle-center
-    movzx r13, byte ptr [rax]   
-    mov [rdi], r13
+    movzx r13, byte ptr [rbx]   
+    mov [rbx], r13
     ;-------------------------------------middle-right
-     mov r14, rdx
-    sub r14, 3
-    cmp r15, r14
+     cmp r11, rdx
     je handle_middle_right_edge
-    mov rdi, 0  
-              
-    add rdi, 3                  ; rdi = current + 3
-    add rdi, rax      
-    movzx r13, byte ptr [rdi]  
+    mov rbx, 0               
+    add rbx, 3                  ; rbx = current + 3
+    add rbx, rax      
+    movzx r13, byte ptr [rbx]  
 continue_middle_right:
     mov [rdi], r13
+    inc rdi
     ;-------------------------------------bottom-left
-    cmp r15, 0
+    cmp r11, 0
     je handle_bottom_left_edge
-    mov rdi, 0  
-                   
-    sub rdi, rdx
-    add rdi, 3                  ; rdi = current + width - 3
-    add rdi, rax 
-    movzx r13, byte ptr [rdi]   
+    mov rbx, 0                 
+    add rbx, rdx
+    sub rbx, 3                  ; rbx = current + width - 3
+    add rbx, rax 
+    movzx r13, byte ptr [rbx]   
 continue_bottom_left:
     mov [rdi], r13
+    inc rdi
     ;-------------------------------------bottom-center
-    mov rdi, 0  
-                 
-    add rdi, rdx                ; rdi = current + width
-    add rdi, rax   
-    movzx r13, byte ptr [rdi]    
+    mov rbx, 0                
+    add rbx, rdx                ; rbx = current + width
+    add rbx, rax   
+    movzx r13, byte ptr [rbx]    
     mov [rdi], r13
     ;-------------------------------------bottom-right
-    mov r14, rdx
-    sub r14, 3
-    cmp r15, r14
+    cmp r11, rdx
     je handle_bottom_right_edge
-    mov rdi, 0  
+    mov rbx, 0  
                  
-    add rdi, rdx      
-    add rdi, 3                  ; rdi = current + width + 3
-    add rdi, rax   
-    movzx r13, byte ptr [rdi]   
+    add rbx, rdx      
+    add rbx, 3                  ; rbx = current + width + 3
+    add rbx, rax   
+    movzx r13, byte ptr [rbx]   
 continue_bottom_right:
     mov [rdi], r13
 
 next_pixel:
     add r11, 3                  ; Increment column index
     add r12, 3                  ; Increment pixel index
-
     jmp column_loop             ; Repeat for the next column
 
     jmp start_sorting
