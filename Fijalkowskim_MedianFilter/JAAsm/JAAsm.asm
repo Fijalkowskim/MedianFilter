@@ -34,17 +34,17 @@ column_loop:
     ;jmp apply_negative
 
 ;---------------Calculate 3x3 mask---------------
-    lea rdi, [maskArray]
+    lea rdi, [maskArray]  
     ;-------------------------------------top-left
-    cmp r11, 0
-    je handle_top_left_edge
-    mov rbx, 0                  
+    cmp r11, 0    
+    je handle_top_left_edge   
+    mov rbx, 0  
     sub rbx, rdx
     sub rbx, 3                  ; rbx = current - width - 3
-    add rbx, rax 
+    add rbx, rax  
     movzx r13, byte ptr [rbx]     
 continue_top_left:
-    mov [rdi], r13       
+    mov [rdi], r13      
     inc rdi
     ;-------------------------------------top-center
     mov rbx, 0                
@@ -53,6 +53,7 @@ continue_top_left:
     movzx r13, byte ptr [rbx]    
     mov [rdi], r13
     inc rdi
+
     ;-------------------------------------top-right
     cmp r11, rdx
     je handle_top_right_edge
@@ -65,6 +66,7 @@ continue_top_left:
 continue_top_right:
     mov [rdi], r13
     inc rdi
+
     ;-------------------------------------middle-left
     cmp r11, 0
     je handle_middle_left_edge
@@ -77,8 +79,11 @@ continue_middle_left:
     mov [rdi], r13
     inc rdi
     ;-------------------------------------middle-center
+    mov rbx, 0
+    add rbx, rax 
     movzx r13, byte ptr [rbx]   
-    mov [rbx], r13
+    mov [rdi], r13
+    inc rdi
     ;-------------------------------------middle-right
      cmp r11, rdx
     je handle_middle_right_edge
