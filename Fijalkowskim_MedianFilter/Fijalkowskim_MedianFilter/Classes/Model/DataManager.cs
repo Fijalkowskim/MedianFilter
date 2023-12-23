@@ -13,7 +13,7 @@ namespace Fijalkowskim_MedianFilter
     {
 #if DEBUG
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
-        unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
+        unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows, int threadNumber);
 
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
         static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
@@ -115,7 +115,7 @@ namespace Fijalkowskim_MedianFilter
                         int taskIndex = i;
                         tasks.Add(Task.Run(() => {
 
-                            BitmapStripeResult res = ApplyAsmMedianFilter(tasksData[taskIndex], bitmapWidth * 3);
+                            BitmapStripeResult res = ApplyAsmMedianFilter(tasksData[taskIndex], bitmapWidth * 3, taskIndex);
                             report.percentageDone = (taskIndex + 1) * 100 / numberOfTasks;
                             progress.Report(report);
                             return res;
@@ -225,7 +225,7 @@ namespace Fijalkowskim_MedianFilter
             Marshal.FreeHGlobal(ptr);
             return new BitmapStripeResult(resultArray, taskData.startRow, taskData.rows);
         }
-        BitmapStripeResult ApplyAsmMedianFilter(TaskData taskData, int stripeWidth)
+        BitmapStripeResult ApplyAsmMedianFilter(TaskData taskData, int stripeWidth, int threadNumber)
         {
             int stripeLength = taskData.bitmapStripe.Count;
             int resultSize = stripeWidth * taskData.rows;
@@ -236,7 +236,7 @@ namespace Fijalkowskim_MedianFilter
             {
                 fixed (byte* bytePtr = taskData.bitmapStripe.ToArray())
                 {
-                    AsmMedianFilter(bytePtr, stripeWidth, taskData.rows);
+                    AsmMedianFilter(bytePtr, stripeWidth, taskData.rows, threadNumber);
                     if (bytePtr != null)
                     {
                         try

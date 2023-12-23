@@ -1,5 +1,4 @@
-.data
-    filteredMaskR DB 9 DUP(?) 
+.data  
     maskArray DB 9 DUP(?)
 .code
 AsmMedianFilter proc
@@ -7,6 +6,7 @@ AsmMedianFilter proc
     ; rcx - bitmap stripe 
     ; rdx - bitmap width
     ; r8 - number of rows in this stripe
+    ; r9 - thread number
     ; r10 - y (row)
     ; r11 - x (column)
     ; r12 - current pixel index
@@ -35,6 +35,7 @@ column_loop:
 
 ;---------------Calculate 3x3 mask---------------
     lea rdi, [maskArray]  
+    ;(to fix) All threads should have different array adresses ex: maskArray + r9 (thread number) * 9
     ;-------------------------------------top-left
     cmp r11, 0    
     je handle_top_left_edge   
@@ -123,11 +124,6 @@ continue_bottom_left:
 continue_bottom_right:
     mov [rdi], r13
 
-next_pixel:
-    add r11, 3                  ; Increment column index
-    add r12, 3                  ; Increment pixel index
-    jmp column_loop             ; Repeat for the next column
-
     jmp start_sorting
 ;---------------/Calculate 3x3 mask---------------
 
@@ -154,101 +150,75 @@ handle_bottom_right_edge:
 
 
 ;-------------------------------------------------SORTING-------------------------------------------------
-    ; rxc - Number of elements in the array
     ; rdi - 3x3 Array
-    ; r8 - y
-    ; r9 - x
-    ; r10 - Number of elements in the array
+    ; r13 - y
+    ; r15 - x
+    ; r14 - Number of elements in the array
+    ; al - current element 
+    ; bl - next element
 
 
 start_sorting:
     ; Sort the array (simple bubble sort for small arrays)
-    mov r10, 9                  ; Number of elements in the array
+     
+    mov r14b, 9              
     
-    mov r8, 0                   ; Outer loop counter
-
+    mov r13, 0                   ; Outer loop counter
+     
 outer_loop:
-    mov r9, 0                   ; Inner loop counter
+    mov r15b, 0                   ; Inner loop counter
+    lea rdi, [maskArray]   
 
 inner_loop:
-;    mov al, [rdi]              ; Load current element
-;    mov bl, [rdi + 1]          ; Load next element
-;    cmp al, bl                ; Compare current and next element
-;    jbe no_swap                 ; Jump if not greater (no swap needed)
+    mov al, [rdi]              ; Load current element
+    mov bl, [rdi + 1]          ; Load next element
+    cmp al, bl                 ; Compare current and next element
+    jbe no_swap                ; Jump if not greater (no swap needed)
 
     ; Swap elements
-    ;mov byte ptr [rdi], bl              ; Store next element at current position
-    ;mov [rdi + 1], al          ; Store current element at next position
+    mov byte ptr [rdi], bl              ; Store next element at current position
+    mov [rdi + 1], al          ; Store current element at next position
 
 no_swap:
-    add r9, 1                   ; Increment inner loop counter
-;    inc rdi                 ; Move to the next element
-    cmp r9, r10                 ; Compare with the number of elements
+    add r15b, 1                   ; Increment inner loop counter
+    inc rdi                     ; Move to the next element
+    cmp r15b, r14b              ; Compare with the number of elements
     jl inner_loop               ; Jump if inner loop counter < 9
 
-    add r8, 1                   ; Increment outer loop counter
-    cmp r8, 8                   ; Compare with the number of elements - 1
+    add r13, 1                   ; Increment outer loop counter
+    cmp r13, 8                  ; Compare with the number of elements - 1
     jl outer_loop               ; Jump if outer loop counter < 8
 
+
     ; Select the middle element from the sorted array
-;    mov rsi, [rsp + 4]          ; rsi = middle-left
+    lea rdi, [maskArray]  
+    mov al, [rdi + 4] 
 
-    ; Store the result pixel in the output bitmap
-
-;    movzx r8, byte ptr [rsp + 4]
-
-    ;movzx r14, byte ptr[rsi]
-    ;mov rax, r12                ; Set current pixel pointer
-    ;mov byte ptr [rax], sil     ; Store the result pixel value
-    ;inc rax
-    ;mov byte ptr [rax], sil     ; Store the result pixel value
-    ;inc rax
-    ;mov byte ptr [rax], sil     ; Store the result pixel value
-
-   
-    
+   ;set current pixel as maskArray pointer
+    mov byte ptr [rax], al
+    jmp next_pixel
     
 
 ;-------------------------------------------------/SORTING-------------------------------------------------
 
-; Stack: r12,r11,r10,r8
-    pop r12
-    pop r11
-    pop r10
-    pop r8
 
-    add r11, 3                  ; Increment column index
-    add r12, 3                  ; Increment pixel index
-
-    jmp column_loop             ; Repeat for the next column
-
-
-
-next_row:
-    add r10, 1                  ; Increment row index
-    jmp row_loop                ; Repeat for the next row
 
 ;--Example------------
 apply_negative:
-mov r9,255
-    sub r9, [rax]
+mov r15,255
+    sub r15, [rax]
 
-    mov byte ptr [rax], r9b
-
-    inc rax
-     mov r9,255
-    sub r9, [rax]
-
-    mov byte ptr [rax], r9b
-
-    inc rax
-     mov r9,255
-    sub r9, [rax]
-
-    mov byte ptr [rax], r9b
+    mov byte ptr [rax], r15b
 
     jmp next_pixel
 
+next_pixel:
+    add r11, 1                 ; Increment column index
+    add r12, 1                  ; Increment pixel index
+    jmp column_loop             ; Repeat for the next column
+next_row:
+    add r10, 1                  ; Increment row index
+    jmp row_loop                ; Repeat for the next row
 end_process:
     ret
 AsmMedianFilter endp
