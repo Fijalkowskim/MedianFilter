@@ -11,7 +11,6 @@ AsmMedianFilter proc
 
     mov r10, 0                  ; Initialize row
     mov r12, rdx                ; Initialize start stripe position (bitmapWitdth)
-    mov r13, rdx                ; Initialize pixel index
 
 row_loop:
     cmp r10, r8                 ; Check if we have reached the end of the stripe
@@ -36,23 +35,23 @@ column_loop:
     cmp r11, 0    
     je handle_top_left_edge   
     mov rbx, 0  
+    add rbx, rax 
     sub rbx, rdx
-    sub rbx, 3                  ; rbx = current - width - 3
-    add rbx, rax  
+    sub rbx, 3                  ; rbx = current - width - 3   
     movzx r13, byte ptr [rbx]     
 continue_top_left:
     movq xmm1, r13     
     ;-------------------------------------top-center
-    mov rbx, 0                
+    mov rbx, 0    
+    add rbx, rax 
     sub rbx, rdx                ; rbx = current - width
-    add rbx, rax    
+       
     movzx r13, byte ptr [rbx]    
     movq xmm2, r13
     ;-------------------------------------top-right
     cmp r11, rdx
     je handle_top_right_edge
-    mov rbx, 0  
-               
+    mov rbx, 0              
     sub rbx, rdx      
     add rbx, 3                  ; rbx = current - width + 3
     add rbx, rax     
@@ -63,10 +62,9 @@ continue_top_right:
     ;-------------------------------------middle-left
     cmp r11, 0
     je handle_middle_left_edge
-    mov rbx, 0  
-                  
-    sub rbx, 3                  ; rbx = current - 3
-    add rbx, rax  
+    mov rbx, 0               
+    sub rbx, 3                  
+    add rbx, rax               ; rbx = current - 3   
     movzx r13, byte ptr [rbx]   
 continue_middle_left:
     movq xmm4, r13
@@ -110,9 +108,14 @@ continue_bottom_left:
     add rbx, rax   
     movzx r13, byte ptr [rbx]   
 continue_bottom_right:
-    movq xmm9, r13
-    push r11
-    push r12
+    movq xmm9, r13 
+
+    ;--TEST--------------
+    movq r13, xmm4
+    mov byte ptr [rax], r13b
+    jmp next_pixel
+
+
     jmp start_sorting
 ;---------------/Calculate 3x3 mask---------------
 
@@ -141,77 +144,76 @@ handle_bottom_right_edge:
 ;-------------------------------------------------SORTING-------------------------------------------------
     ; xmm - 3x3 Array
     ; r13 - loop
-    ; r11 - current element 
-    ; r12 - next element
-
+    ; r9 - current element 
+    ; r13 - next element
 
 start_sorting:
     ; Sort the array (simple bubble sort for small arrays)                
-    mov r13, 0                   ; Outer loop counter
+    mov r13, 0                   ; loop counter
 inner_loop:
-    movq r11, xmm1        ; Load current element
-    movq r12, xmm2          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+    movq r9, xmm1        ; Load current element
+    movq r13, xmm2          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_1               ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm1, r12            ; Store next element at current position
-    movq xmm2, r11         ; Store current element at next position
+    movq xmm1, r13            ; Store next element at current position
+    movq xmm2, r9         ; Store current element at next position
 no_swap_1:
-movq r11, xmm2        ; Load current element
-    movq r12, xmm3          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+movq r9, xmm2        ; Load current element
+    movq r13, xmm3          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_2              ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm2, r12            ; Store next element at current position
-    movq xmm3, r11         ; Store current element at next position
+    movq xmm2, r13            ; Store next element at current position
+    movq xmm3, r9         ; Store current element at next position
 no_swap_2:
-movq r11, xmm3        ; Load current element
-    movq r12, xmm4          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+movq r9, xmm3        ; Load current element
+    movq r13, xmm4          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_3               ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm3, r12            ; Store next element at current position
-    movq xmm4, r11         ; Store current element at next position
+    movq xmm3, r13            ; Store next element at current position
+    movq xmm4, r9         ; Store current element at next position
 no_swap_3:
-movq r11, xmm4        ; Load current element
-    movq r12, xmm5          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+movq r9, xmm4        ; Load current element
+    movq r13, xmm5          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_4               ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm4, r12            ; Store next element at current position
-    movq xmm5, r11         ; Store current element at next position
+    movq xmm4, r13            ; Store next element at current position
+    movq xmm5, r9         ; Store current element at next position
 no_swap_4:
-movq r11, xmm5        ; Load current element
-    movq r12, xmm6          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+movq r9, xmm5        ; Load current element
+    movq r13, xmm6          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_5               ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm5, r12            ; Store next element at current position
-    movq xmm6, r11         ; Store current element at next position
+    movq xmm5, r13            ; Store next element at current position
+    movq xmm6, r9         ; Store current element at next position
 no_swap_5:
-movq r11, xmm6        ; Load current element
-    movq r12, xmm7          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+movq r9, xmm6        ; Load current element
+    movq r13, xmm7          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_6               ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm6, r12            ; Store next element at current position
-    movq xmm7, r11         ; Store current element at next position
+    movq xmm6, r13            ; Store next element at current position
+    movq xmm7, r9         ; Store current element at next position
 no_swap_6:
-movq r11, xmm7        ; Load current element
-    movq r12, xmm8          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+movq r9, xmm7        ; Load current element
+    movq r13, xmm8          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_7               ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm7, r12            ; Store next element at current position
-    movq xmm8, r11         ; Store current element at next position
+    movq xmm7, r13            ; Store next element at current position
+    movq xmm8, r9         ; Store current element at next position
 no_swap_7:
-movq r11, xmm8        ; Load current element
-    movq r12, xmm9          ; Load next element
-    cmp r11, r12                ; Compare current and next element
+movq r9, xmm8        ; Load current element
+    movq r13, xmm9          ; Load next element
+    cmp r9, r13                ; Compare current and next element
     jbe no_swap_8               ; Jump if not greater (no swap needed)
     ; Swap elements
-    movq xmm8, r12            ; Store next element at current position
-    movq xmm9, r11         ; Store current element at next position
+    movq xmm8, r13            ; Store next element at current position
+    movq xmm9, r9         ; Store current element at next position
 no_swap_8:
 
     add r13, 1                   ; Increment outer loop counter
@@ -219,27 +221,24 @@ no_swap_8:
     jl inner_loop               ; Jump if outer loop counter < 8
 
     ; Select the middle element from the sorted array
-    movq r11, xmm4
-    mov byte ptr [rax], r11b
+    movq r9, xmm5
+    mov byte ptr [rax], r9b
     jmp next_pixel
     
 
 ;-------------------------------------------------/SORTING-------------------------------------------------
-
+ 
 
 
 ;--Example------------
 apply_negative:
-    mov r14, 255
-    sub r14, [rax]
+    mov r9, 255
+    sub r9, [rax]
 
-    mov byte ptr [rax], r14b
-
+    mov byte ptr [rax], r9b
     jmp next_pixel
 
 next_pixel:
-    pop r12                     
-    pop r11 
     add r11, 1                 ; Increment column index
     add r12, 1                  ; Increment pixel index
     jmp column_loop             ; Repeat for the next column
