@@ -1,5 +1,7 @@
-.data  
-    maskArray DB 9 DUP(?)
+.data
+    maskArraySize equ 9
+    maxThreads equ 64
+    maskArray QWORD maxThreads * maskArraySize DUP (0)
 .code
 AsmMedianFilter proc
     ; Parameters:
@@ -11,6 +13,11 @@ AsmMedianFilter proc
     ; r11 - x (column)
     ; r12 - current pixel index
     ; rax - current pixel pointer
+
+     ; Calculate unique maskArray address for each thread
+    
+
+    ; Now rdi points to the unique maskArray for the current thread
 
     mov r10, 0                  ; Initialize row
     mov r12, rdx                ; Initialize start stripe position (bitmapWitdth)
@@ -34,7 +41,10 @@ column_loop:
     ;jmp apply_negative
 
 ;---------------Calculate 3x3 mask---------------
-    lea rdi, [maskArray]  
+    lea rdi, [maskArray]
+    mov r13, r9
+    shl r13, 3  ; Multiply thread number by 8 (size of QWORD)
+    add rdi, r13
     ;(to fix) All threads should have different array adresses ex: maskArray + r9 (thread number) * 9
     ;-------------------------------------top-left
     cmp r11, 0    
@@ -123,7 +133,8 @@ continue_bottom_left:
     movzx r13, byte ptr [rbx]   
 continue_bottom_right:
     mov [rdi], r13
-
+    push r11
+    push r12
     jmp start_sorting
 ;---------------/Calculate 3x3 mask---------------
 
@@ -154,8 +165,8 @@ handle_bottom_right_edge:
     ; r13 - y
     ; r15 - x
     ; r14 - Number of elements in the array
-    ; al - current element 
-    ; bl - next element
+    ; r11b - current element 
+    ; r12b - next element
 
 
 start_sorting:
@@ -167,17 +178,22 @@ start_sorting:
      
 outer_loop:
     mov r15b, 0                   ; Inner loop counter
-    lea rdi, [maskArray]   
+    push r13
+    lea rdi, [maskArray]
+    mov r13, r9
+    shl r13, 3  ; Multiply thread number by 8 (size of QWORD)
+    add rdi, r13 
+    pop r13
 
 inner_loop:
-    mov al, [rdi]              ; Load current element
-    mov bl, [rdi + 1]          ; Load next element
-    cmp al, bl                 ; Compare current and next element
+    mov r11b, [rdi]              ; Load current element
+    mov r12b, [rdi + 1]          ; Load next element
+    cmp r11b, r12b                 ; Compare current and next element
     jbe no_swap                ; Jump if not greater (no swap needed)
 
     ; Swap elements
-    mov byte ptr [rdi], bl              ; Store next element at current position
-    mov [rdi + 1], al          ; Store current element at next position
+    mov byte ptr [rdi], r12b              ; Store next element at current position
+    mov byte ptr [rdi + 1], r11b          ; Store current element at next position
 
 no_swap:
     add r15b, 1                   ; Increment inner loop counter
@@ -191,11 +207,14 @@ no_swap:
 
 
     ; Select the middle element from the sorted array
-    lea rdi, [maskArray]  
-    mov al, [rdi + 4] 
+    lea rdi, [maskArray]
+    mov r13, r9
+    shl r13, 3  ; Multiply thread number by 8 (size of QWORD)
+    add rdi, r13
+    mov r11b, [rdi + 4] 
 
    ;set current pixel as maskArray pointer
-    mov byte ptr [rax], al
+    mov byte ptr [rax], r11b
     jmp next_pixel
     
 
@@ -205,14 +224,16 @@ no_swap:
 
 ;--Example------------
 apply_negative:
-mov r15,255
-    sub r15, [rax]
+    mov r14, 255
+    sub r14, [rax]
 
-    mov byte ptr [rax], r15b
+    mov byte ptr [rax], r14b
 
     jmp next_pixel
 
 next_pixel:
+    pop r12                     
+    pop r11 
     add r11, 1                 ; Increment column index
     add r12, 1                  ; Increment pixel index
     jmp column_loop             ; Repeat for the next column
