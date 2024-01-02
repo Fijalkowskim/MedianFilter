@@ -13,7 +13,7 @@ namespace Fijalkowskim_MedianFilter
     {
 #if DEBUG
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
-        unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows, int threadNumber);
+        unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
 
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
         static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
@@ -236,7 +236,7 @@ namespace Fijalkowskim_MedianFilter
             {
                 fixed (byte* bytePtr = taskData.bitmapStripe.ToArray())
                 {
-                    AsmMedianFilter(bytePtr, stripeWidth, taskData.rows, threadNumber);
+                    AsmMedianFilter(bytePtr, stripeWidth, taskData.rows);
                     if (bytePtr != null)
                     {
                         try
