@@ -10,6 +10,7 @@ AsmMedianFilter proc
     ; rax - current pixel pointer
 
     mov r10, 0                  ; Initialize row
+    ;mov r12, rdx               ; Initialize start stripe position (bitmapWitdth)
     mov r12, rdx               ; Initialize start stripe position (bitmapWitdth)
 
 row_loop:
@@ -38,14 +39,14 @@ column_loop:
     add rbx, rax 
     sub rbx, rdx
     sub rbx, 3                  ; rbx = current - width - 3   
-    movzx r13, byte ptr [rbx]     
+    movzx r13, byte ptr [rbx]  
 continue_top_left:
     pinsrb xmm0, r13, 0  
     ;-------------------------------------top-center
     mov rbx, 0    
     add rbx, rax 
     sub rbx, rdx                ; rbx = current - width      
-    movzx r13, byte ptr [rbx]    
+    movzx r13, byte ptr [rbx]   
     pinsrb xmm0, r13, 1
     ;-------------------------------------top-right
     cmp r11, rdx
@@ -61,15 +62,15 @@ continue_top_right:
     cmp r11, 0
     je handle_middle_left_edge
     mov rbx, 0               
-    sub rbx, 3 
+    sub rbx, 3
     add rbx, rax               ; rbx = current - 3   
-    movzx r13, byte ptr [rbx]   
+    movzx r13, byte ptr [rbx]     
 continue_middle_left:
     pinsrb xmm0, r13, 3
     ;-------------------------------------middle-center
     mov rbx, 0
     add rbx, rax 
-    movzx r13, byte ptr [rbx]   
+    movzx r13, byte ptr [rbx] 
     pinsrb xmm0, r13, 4
     ;-------------------------------------middle-right
      cmp r11, rdx
@@ -99,8 +100,7 @@ continue_bottom_left:
     ;-------------------------------------bottom-right
     cmp r11, rdx
     je handle_bottom_right_edge
-    mov rbx, 0  
-                 
+    mov rbx, 0                  
     add rbx, rdx      
     add rbx, 3                  ; rbx = current + width + 3
     add rbx, rax   
@@ -108,7 +108,7 @@ continue_bottom_left:
 continue_bottom_right:
     pinsrb xmm0, r13, 8
 
-    jmp start_sorting
+    ;jmp start_sorting
 
     ;--TEST--------------
     pextrb r13, xmm0, 3

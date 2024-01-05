@@ -86,8 +86,22 @@ namespace Fijalkowskim_MedianFilter
 
             BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
 
+
+
+
+
+            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
+            SaveBitmapToFile(loadedBitmap, "OriginalBitmap.txt");
+            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
+
+
+
+
+
+
             switch (dllType)
             {
+
                 //C++
                 case DllType.CPP:                 
                     //Main filtering tasks
@@ -132,8 +146,9 @@ namespace Fijalkowskim_MedianFilter
                 AddStripeToBitmap(ref result, tasks[i].Result.resultArray, tasks[i].Result.startRow, tasks[i].Result.rows);
             }
 
-
-
+            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
+            SaveBitmapToFile(result, "FilteredBitmap.txt");
+            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
             stopwatch.Stop();
             HandleTimer();
             applyingFilter = false;
@@ -289,6 +304,29 @@ namespace Fijalkowskim_MedianFilter
             }
             return false;
         }
+        #region File saving helpers
+        void SaveBitmapToFile(Bitmap bitmap, String filename)
+        {
+            if (bitmap == null)
+                return;
+
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(filename))
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        Color pixelColor = bitmap.GetPixel(x, y);
+                        file.Write($"({pixelColor.R} {pixelColor.G} {pixelColor.B})");
+                    }
+                    file.WriteLine();
+                }
+            }
+        }
+        #endregion
         #region Conversion methods
         public byte[] PointerToArray(IntPtr ptr, int size)
         {
