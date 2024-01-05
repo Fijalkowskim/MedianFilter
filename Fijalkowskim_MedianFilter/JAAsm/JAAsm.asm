@@ -150,11 +150,6 @@ continue_bottom_right:
     pinsrb xmm0, r13, 8
 
     jmp start_sorting
-
-    ;--TEST--------------
-    pextrb r13, xmm0, 4
-    mov byte ptr [rax], r13b
-    jmp next_pixel
 ;---------------/Calculate 3x3 mask---------------
 
 ; Horizontal edge hadling
@@ -194,7 +189,7 @@ inner_loop:
     cmp r9, r13                ; Compare current and next element
     jbe no_swap_1               ; Jump if not greater (no swap needed)
     ; Swap elements
-    pinsrb xmm0, r9, 1            ; Store next element at current position
+    pinsrb xmm0, r9, 1          ; Store next element at current position
     pinsrb xmm0, r13, 0           ; Store current element at next position
 no_swap_1:
     pextrb r9, xmm0, 1       ; Load current element
