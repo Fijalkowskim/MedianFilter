@@ -68,11 +68,7 @@ namespace Fijalkowskim_MedianFilter
             applyingFilter = true;
 
             //Cannellation token
-            if (cancellationTokenSource != null)
-            {
-                cancellationTokenSource.Cancel();
-                cancellationTokenSource.Dispose();
-            }
+            StopProcess();
             cancellationTokenSource = new CancellationTokenSource();
 
             //Setting tasks
@@ -281,6 +277,17 @@ namespace Fijalkowskim_MedianFilter
                 previousExecutionTime = currentExecutionTime;
             currentExecutionTime = stopwatch.ElapsedMilliseconds;
             controller.mainMenu.SetExecutionTime(currentExecutionTime.ToString(), previousExecutionTime < 0 ? "" : previousExecutionTime.ToString());
+        }
+        public bool StopProcess()
+        {
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+                cancellationTokenSource = null;
+                return true;
+            }
+            return false;
         }
         #region Conversion methods
         public byte[] PointerToArray(IntPtr ptr, int size)

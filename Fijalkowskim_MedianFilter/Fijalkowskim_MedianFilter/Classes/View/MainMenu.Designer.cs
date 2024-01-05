@@ -117,7 +117,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             // baseImagePreview
             // 
-            this.baseImagePreview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.baseImagePreview.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.baseImagePreview.Location = new System.Drawing.Point(6, 16);
             this.baseImagePreview.Name = "baseImagePreview";
             this.baseImagePreview.Size = new System.Drawing.Size(505, 319);
