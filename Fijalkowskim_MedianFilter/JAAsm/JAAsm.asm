@@ -10,7 +10,6 @@ AsmMedianFilter proc
     ; rax - current pixel pointer
 
     mov r10, 0                  ; Initialize row
-    ;mov r12, rdx               ; Initialize start stripe position (bitmapWitdth)
     mov r12, rdx               ; Initialize start stripe position (bitmapWitdth)
 
 row_loop:
@@ -35,6 +34,10 @@ column_loop:
     ;-------------------------------------top-left
     cmp r11, 0    
     je handle_top_left_edge   
+    cmp r11, 1   
+    je handle_top_left_edge
+    cmp r11, 2    
+    je handle_top_left_edge
     mov rbx, 0  
     add rbx, rax 
     sub rbx, rdx
@@ -49,7 +52,17 @@ continue_top_left:
     movzx r13, byte ptr [rbx]   
     pinsrb xmm0, r13, 1
     ;-------------------------------------top-right
-    cmp r11, rdx
+    mov r13, rdx
+    sub r13, 3
+    cmp r11, r13
+    je handle_top_right_edge
+    mov r13, rdx
+    sub r13, 2
+    cmp r11, r13
+    je handle_top_right_edge
+    mov r13, rdx
+    sub r13, 1
+    cmp r11, r13
     je handle_top_right_edge
     mov rbx, 0              
     sub rbx, rdx      
@@ -60,6 +73,10 @@ continue_top_right:
     pinsrb xmm0, r13, 2
     ;-------------------------------------middle-left
     cmp r11, 0
+    je handle_middle_left_edge
+    cmp r11, 1   
+    je handle_middle_left_edge
+    cmp r11, 2   
     je handle_middle_left_edge
     mov rbx, 0               
     sub rbx, 3
@@ -73,7 +90,17 @@ continue_middle_left:
     movzx r13, byte ptr [rbx] 
     pinsrb xmm0, r13, 4
     ;-------------------------------------middle-right
-     cmp r11, rdx
+    mov r13, rdx
+    sub r13, 3
+    cmp r11, r13
+    je handle_middle_right_edge
+    mov r13, rdx
+    sub r13, 2
+    cmp r11, r13
+    je handle_middle_right_edge
+    mov r13, rdx
+    sub r13, 1
+    cmp r11, r13
     je handle_middle_right_edge
     mov rbx, 0               
     add rbx, 3                  ; rbx = current + 3
@@ -83,6 +110,10 @@ continue_middle_right:
     pinsrb xmm0, r13, 5
     ;-------------------------------------bottom-left
     cmp r11, 0
+    je handle_bottom_left_edge
+    cmp r11, 1   
+    je handle_bottom_left_edge
+    cmp r11, 2    
     je handle_bottom_left_edge
     mov rbx, 0                 
     add rbx, rdx
@@ -98,7 +129,17 @@ continue_bottom_left:
     movzx r13, byte ptr [rbx]    
     pinsrb xmm0, r13, 7
     ;-------------------------------------bottom-right
-    cmp r11, rdx
+    mov r13, rdx
+    sub r13, 3
+    cmp r11, r13
+    je handle_bottom_right_edge
+    mov r13, rdx
+    sub r13, 2
+    cmp r11, r13
+    je handle_bottom_right_edge
+    mov r13, rdx
+    sub r13, 1
+    cmp r11, r13
     je handle_bottom_right_edge
     mov rbx, 0                  
     add rbx, rdx      
@@ -108,10 +149,10 @@ continue_bottom_left:
 continue_bottom_right:
     pinsrb xmm0, r13, 8
 
-    ;jmp start_sorting
+    jmp start_sorting
 
     ;--TEST--------------
-    pextrb r13, xmm0, 3
+    pextrb r13, xmm0, 4
     mov byte ptr [rax], r13b
     jmp next_pixel
 ;---------------/Calculate 3x3 mask---------------
@@ -140,13 +181,13 @@ handle_bottom_right_edge:
 
 ;-------------------------------------------------SORTING-------------------------------------------------
     ; xmm - 3x3 Array
-    ; r13 - loop
+    ; rbx - loop
     ; r9 - current element 
     ; r13 - next element
 
 start_sorting:
     ; Sort the array (simple bubble sort for small arrays)                
-    mov r13, 0                   ; loop counter
+    mov rbx, 0                   ; loop counter
 inner_loop:
     pextrb r9, xmm0, 0       ; Load current element
     pextrb r13, xmm0, 1           ; Load next element
@@ -213,8 +254,8 @@ no_swap_7:
     pinsrb xmm0, r13, 7           ; Store current element at next position
 no_swap_8:
 
-    add r13, 1                   ; Increment outer loop counter
-    cmp r13, 8                  ; Compare with the number of elements - 1
+    add rbx, 1                   ; Increment outer loop counter
+    cmp rbx, 8                  ; Compare with the number of elements - 1
     jl inner_loop               ; Jump if outer loop counter < 8
 
     ; Select the middle element from the sorted array

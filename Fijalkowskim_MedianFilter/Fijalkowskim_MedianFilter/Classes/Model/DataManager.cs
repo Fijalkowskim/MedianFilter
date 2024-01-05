@@ -86,18 +86,7 @@ namespace Fijalkowskim_MedianFilter
 
             BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
 
-
-
-
-
-            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
-            SaveBitmapToFile(loadedBitmap, "OriginalBitmap.txt");
-            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
-
-
-
-
-
+            //SaveBitmapToFile(loadedBitmap, "OriginalBitmap.txt");
 
             switch (dllType)
             {
@@ -145,10 +134,7 @@ namespace Fijalkowskim_MedianFilter
                 if (result == null) continue;
                 AddStripeToBitmap(ref result, tasks[i].Result.resultArray, tasks[i].Result.startRow, tasks[i].Result.rows);
             }
-
-            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
-            SaveBitmapToFile(result, "FilteredBitmap.txt");
-            //REMOVE LATER--------------------------------------------------WETRFERWGT ETRHBRTHBRTYHNRTYJHNRG34ETG45YT5474574574575474574574574574574
+            //SaveBitmapToFile(result, "FilteredBitmap.txt");
             stopwatch.Stop();
             HandleTimer();
             applyingFilter = false;
