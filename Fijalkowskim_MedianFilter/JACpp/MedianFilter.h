@@ -2,7 +2,7 @@
 #include "pch.h"
 #include <algorithm>
 
-extern "C" __declspec(dllexport) void FilterBitmapStripe(unsigned char* stripe, int bitmapWidth, int rows)
+extern "C" __declspec(dllexport) void CppMedianFilter(unsigned char* stripe, int bitmapWidth, int rows)
 {
 	int indexes[9];
 	unsigned char fileredMaskR[9];

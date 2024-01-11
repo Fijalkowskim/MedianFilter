@@ -16,14 +16,14 @@ namespace Fijalkowskim_MedianFilter
         unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
 
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
-        unsafe static extern void FilterBitmapStripe(byte*  stripe, int bitmapWidth, int rows);
+        unsafe static extern void CppMedianFilter(byte*  stripe, int bitmapWidth, int rows);
 
 #else
- [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
         unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
 
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
-        static extern void FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
+        unsafe static extern void CppMedianFilter(byte* stripe, int bitmapWidth, int rows);
 #endif
         Controller controller;
         //Bitmap
@@ -35,7 +35,7 @@ namespace Fijalkowskim_MedianFilter
         //Controll variables
         public bool applyingFilter { get; private set; }
         public bool dataLoaded { get; private set; }
-        static readonly object arrayLock = new object();
+        static readonly object _lock = new object();
         private CancellationTokenSource cancellationTokenSource;
         //Stopwatch
         public long currentExecutionTime { get; private set; }
@@ -70,7 +70,6 @@ namespace Fijalkowskim_MedianFilter
             //Cannellation token
             StopProcess();
             cancellationTokenSource = new CancellationTokenSource();
-
             //Setting tasks
             SetUpTasks(numberOfTasks);
             CalculateTaskData();
@@ -80,13 +79,13 @@ namespace Fijalkowskim_MedianFilter
             Bitmap result = new Bitmap(bitmapWidth, bitmapHeight);
             ImageLoadingProgress report = new ImageLoadingProgress();
 
-            //Timer
-            stopwatch.Reset();
-            stopwatch.Start();
-
             BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
 
             //SaveBitmapToFile(loadedBitmap, "OriginalBitmap.txt");
+            int stripeWidth = bitmapWidth * 3;
+            //Timer
+            stopwatch.Reset();
+            stopwatch.Start();
 
             switch (dllType)
             {
@@ -96,34 +95,45 @@ namespace Fijalkowskim_MedianFilter
                     //Main filtering tasks
                     for (int i = 0; i < numberOfTasks; i++)
                     {
-                        int taskIndex = i;
+                        TaskData taskData = tasksData[i];
+                        
                         tasks.Add(Task.Run(() => {
-                         
-                            BitmapStripeResult res = ApplyCppMedianFilter(tasksData[taskIndex], bitmapWidth * 3);
-                            report.percentageDone = (taskIndex + 1) * 100 / numberOfTasks;
-                            progress.Report(report);
+                            int noTasks = numberOfTasks;
+                            BitmapStripeResult res = ApplyCppMedianFilter(taskData, stripeWidth);
+                            lock (_lock)
+                            {
+                                report.percentageDone += 100 / noTasks;
+                                progress.Report(report);
+                            }
                             return res;
 
-                        }, cancellationTokenSource.Token));
+                        }));
                     }
                     break;
                     //Assembly
                 case DllType.ASM:
                     for (int i = 0; i < numberOfTasks; i++)
                     {
-                        int taskIndex = i;
+                        TaskData taskData = tasksData[i];
+                       
                         tasks.Add(Task.Run(() => {
-
-                            BitmapStripeResult res = ApplyAsmMedianFilter(tasksData[taskIndex], bitmapWidth * 3, taskIndex);
-                            report.percentageDone = (taskIndex + 1) * 100 / numberOfTasks;
-                            progress.Report(report);
+                            int noTasks = numberOfTasks;
+                            BitmapStripeResult res = ApplyAsmMedianFilter(taskData, stripeWidth);
+                            lock (_lock)
+                            { 
+                                report.percentageDone +=  100 / noTasks;
+                                progress.Report(report);
+                            }                       
                             return res;
 
-                        }, cancellationTokenSource.Token));
-                    }
+                        }));
+                    }   
                     break;
             }
+
             await Task.WhenAll(tasks);
+            stopwatch.Stop();
+            HandleTimer();
 
             report.percentageDone = 100;
             progress.Report(report);
@@ -135,8 +145,7 @@ namespace Fijalkowskim_MedianFilter
                 AddStripeToBitmap(ref result, tasks[i].Result.resultArray, tasks[i].Result.startRow, tasks[i].Result.rows);
             }
             //SaveBitmapToFile(result, "FilteredBitmap.txt");
-            stopwatch.Stop();
-            HandleTimer();
+            
             applyingFilter = false;
             return result;
         }
@@ -204,7 +213,7 @@ namespace Fijalkowskim_MedianFilter
             {
                 fixed (byte* bytePtr = taskData.bitmapStripe.ToArray())
                 {
-                    FilterBitmapStripe(bytePtr, stripeWidth, taskData.rows);
+                    CppMedianFilter(bytePtr, stripeWidth, taskData.rows);
                     if (bytePtr != null)
                     {
                         try
@@ -227,7 +236,7 @@ namespace Fijalkowskim_MedianFilter
 
             return new BitmapStripeResult(resultArray, taskData.startRow, taskData.rows);
         }
-        BitmapStripeResult ApplyAsmMedianFilter(TaskData taskData, int stripeWidth, int threadNumber)
+        BitmapStripeResult ApplyAsmMedianFilter(TaskData taskData, int stripeWidth)
         {
             int stripeLength = taskData.bitmapStripe.Count;
             int resultSize = stripeWidth * taskData.rows;
@@ -269,7 +278,7 @@ namespace Fijalkowskim_MedianFilter
             {
                 for (int x = 0; x < bitmapWidth; x++)
                 {
-                    lock (arrayLock)
+                    lock (_lock)
                     {
                         bmp.SetPixel(x, y, Color.FromArgb(arr[idx], arr[idx+1], arr[idx+2]));
                     }
