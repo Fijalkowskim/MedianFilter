@@ -86,7 +86,7 @@ namespace Fijalkowskim_MedianFilter
 
             BitmapStripeResult[] tasksResults = new BitmapStripeResult[numberOfTasks];
 
-            SaveBitmapToFile(loadedBitmap, "OriginalBitmap.txt");
+            //SaveBitmapToFile(loadedBitmap, "OriginalBitmap.txt");
 
             switch (dllType)
             {
@@ -134,7 +134,7 @@ namespace Fijalkowskim_MedianFilter
                 if (result == null) continue;
                 AddStripeToBitmap(ref result, tasks[i].Result.resultArray, tasks[i].Result.startRow, tasks[i].Result.rows);
             }
-            SaveBitmapToFile(result, "FilteredBitmap.txt");
+            //SaveBitmapToFile(result, "FilteredBitmap.txt");
             stopwatch.Stop();
             HandleTimer();
             applyingFilter = false;
@@ -199,7 +199,6 @@ namespace Fijalkowskim_MedianFilter
             int resultSize = stripeWidth * taskData.rows;
 
             IntPtr ptr = Marshal.AllocHGlobal(stripeLength);
- 
 
             Marshal.Copy(taskData.bitmapStripe.ToArray(), 0, ptr, stripeLength);
             IntPtr resultPtr = IntPtr.Zero;
