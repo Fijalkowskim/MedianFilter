@@ -118,5 +118,19 @@ namespace Fijalkowskim_MedianFilter
             resultImagePreview.Image = bitmap;
         }
 
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            if(resultImagePreview.Image == null)
+            {
+                MessageBox.Show("There is no image to save", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            SaveFileDialog sf = new SaveFileDialog();
+            sf.Filter = "Image files (*.png;*.jpg)|*.png;*jpg";
+            if(sf.ShowDialog() == DialogResult.OK)
+            {
+                resultImagePreview.Image.Save(sf.FileName);
+            }
+        }
     }
 }

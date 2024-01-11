@@ -48,6 +48,7 @@ namespace Fijalkowskim_MedianFilter
             this.testLabel = new System.Windows.Forms.Label();
             this.imageLoadingProgress = new System.Windows.Forms.ProgressBar();
             this.imageLoadedLabel = new System.Windows.Forms.Label();
+            this.saveButton = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.baseImagePreview)).BeginInit();
             this.basePreviewGroup.SuspendLayout();
@@ -228,7 +229,7 @@ namespace Fijalkowskim_MedianFilter
             // 
             this.imageLoadingProgress.Location = new System.Drawing.Point(33, 640);
             this.imageLoadingProgress.Name = "imageLoadingProgress";
-            this.imageLoadingProgress.Size = new System.Drawing.Size(403, 23);
+            this.imageLoadingProgress.Size = new System.Drawing.Size(645, 23);
             this.imageLoadingProgress.TabIndex = 23;
             // 
             // imageLoadedLabel
@@ -236,17 +237,29 @@ namespace Fijalkowskim_MedianFilter
             this.imageLoadedLabel.AutoSize = true;
             this.imageLoadedLabel.Font = new System.Drawing.Font("Roboto Slab", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.imageLoadedLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
-            this.imageLoadedLabel.Location = new System.Drawing.Point(84, 666);
+            this.imageLoadedLabel.Location = new System.Drawing.Point(215, 666);
             this.imageLoadedLabel.Name = "imageLoadedLabel";
             this.imageLoadedLabel.Size = new System.Drawing.Size(258, 50);
             this.imageLoadedLabel.TabIndex = 24;
             this.imageLoadedLabel.Text = "Image loaded";
+            // 
+            // saveButton
+            // 
+            this.saveButton.Location = new System.Drawing.Point(488, 554);
+            this.saveButton.Margin = new System.Windows.Forms.Padding(5);
+            this.saveButton.Name = "saveButton";
+            this.saveButton.Size = new System.Drawing.Size(190, 58);
+            this.saveButton.TabIndex = 25;
+            this.saveButton.Text = "Save image";
+            this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1376, 767);
+            this.Controls.Add(this.saveButton);
             this.Controls.Add(this.imageLoadedLabel);
             this.Controls.Add(this.imageLoadingProgress);
             this.Controls.Add(this.testLabel);
@@ -296,6 +309,7 @@ namespace Fijalkowskim_MedianFilter
         private System.Windows.Forms.Label testLabel;
         private System.Windows.Forms.ProgressBar imageLoadingProgress;
         private System.Windows.Forms.Label imageLoadedLabel;
+        private System.Windows.Forms.Button saveButton;
     }
 }
 
