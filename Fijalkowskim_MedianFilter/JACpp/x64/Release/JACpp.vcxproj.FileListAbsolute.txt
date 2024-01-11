@@ -1,1 +1,2 @@
 D:\1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\JACpp\x64\Release\JACpp.vcxproj.AssemblyReference.cache
+D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\JACpp\x64\Release\JACpp.vcxproj.AssemblyReference.cache

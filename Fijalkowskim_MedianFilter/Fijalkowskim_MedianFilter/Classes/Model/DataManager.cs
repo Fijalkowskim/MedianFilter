@@ -16,14 +16,14 @@ namespace Fijalkowskim_MedianFilter
         unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
 
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
-        static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
+        unsafe static extern void FilterBitmapStripe(byte*  stripe, int bitmapWidth, int rows);
 
 #else
- [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
-        unsafe static extern void AsmMedianFilter(byte* pixels, int width, int height);
+ [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
+        unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
 
-        [DllImport(@"D:\.1 Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JACpp.dll")]
-        static extern IntPtr FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
+        static extern void FilterBitmapStripe(IntPtr stripe, int bitmapWidth, int rows);
 #endif
         Controller controller;
         //Bitmap
@@ -197,28 +197,34 @@ namespace Fijalkowskim_MedianFilter
         {
             int stripeLength = taskData.bitmapStripe.Count;
             int resultSize = stripeWidth * taskData.rows;
+            byte[] filteredStripe = new byte[stripeLength];
+            byte[] resultArray = new byte[resultSize];
 
-            IntPtr ptr = Marshal.AllocHGlobal(stripeLength);
-
-            Marshal.Copy(taskData.bitmapStripe.ToArray(), 0, ptr, stripeLength);
-            IntPtr resultPtr = IntPtr.Zero;
-
-            byte[] resultArray = null;
-
-            resultPtr = FilterBitmapStripe(ptr, stripeWidth, taskData.rows);
-            if (resultPtr != IntPtr.Zero)
+            unsafe
             {
-                resultArray = new byte[resultSize];
-                try
+                fixed (byte* bytePtr = taskData.bitmapStripe.ToArray())
                 {
-                    Marshal.Copy(resultPtr, resultArray, 0, resultSize);
-                }           
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
+                    FilterBitmapStripe(bytePtr, stripeWidth, taskData.rows);
+                    if (bytePtr != null)
+                    {
+                        try
+                        {
+                            Marshal.Copy((IntPtr)bytePtr, filteredStripe, 0, stripeLength);
+                            int pixelIndex = stripeWidth;
+                            for (int i = 0; i < resultSize; i++)
+                            {
+                                resultArray[i] = filteredStripe[pixelIndex];
+                                pixelIndex++;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
                 }
             }
-            Marshal.FreeHGlobal(ptr);
+
             return new BitmapStripeResult(resultArray, taskData.startRow, taskData.rows);
         }
         BitmapStripeResult ApplyAsmMedianFilter(TaskData taskData, int stripeWidth, int threadNumber)

@@ -2,16 +2,13 @@
 #include "pch.h"
 #include <algorithm>
 
-extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char* stripe, int bitmapWidth, int rows)
+extern "C" __declspec(dllexport) void FilterBitmapStripe(unsigned char* stripe, int bitmapWidth, int rows)
 {
-	int resultSize = rows * bitmapWidth;
-	unsigned char* result = new unsigned char[resultSize];
 	int indexes[9];
 	unsigned char fileredMaskR[9];
 	unsigned char fileredMaskG[9];
 	unsigned char fileredMaskB[9];
 	
-	int resultIndex = 0;
 	int pixelIndex = bitmapWidth;
 	for (int y = 0; y < rows; y++)
 	{
@@ -50,15 +47,13 @@ extern "C" __declspec(dllexport) unsigned char* FilterBitmapStripe(unsigned char
 			std::sort(std::begin(fileredMaskR), std::end(fileredMaskR));
 			std::sort(std::begin(fileredMaskG), std::end(fileredMaskG));
 			std::sort(std::begin(fileredMaskB), std::end(fileredMaskB));
-			result[resultIndex] =		fileredMaskR[4];
-			result[resultIndex + 1] =	fileredMaskG[4];
-			result[resultIndex + 2] =	fileredMaskB[4];
+			stripe[pixelIndex] = fileredMaskR[4];
+			stripe[pixelIndex+1] = fileredMaskG[4];
+			stripe[pixelIndex+2] = fileredMaskB[4];
 
 			pixelIndex+=3;
-			resultIndex += 3;
 		}
 	}
-	return result;
 }
 
 
