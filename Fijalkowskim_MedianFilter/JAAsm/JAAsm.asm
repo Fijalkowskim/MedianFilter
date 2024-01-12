@@ -1,12 +1,12 @@
 .data
-    swap0 BYTE 9 DUP (1,0,2,3,4,5,6,7,8)
-    swap1 BYTE 9 DUP (0,2,1,3,4,5,6,7,8)
-    swap2 BYTE 9 DUP (0,1,3,2,4,5,6,7,8)
-    swap3 BYTE 9 DUP (0,1,2,4,3,5,6,7,8)
-    swap4 BYTE 9 DUP (0,1,2,3,5,4,6,7,8)
-    swap5 BYTE 9 DUP (0,1,2,3,4,6,5,7,8)
-    swap6 BYTE 9 DUP (0,1,2,3,4,5,7,6,8)
-    swap7 BYTE 9 DUP (0,1,2,3,4,5,6,8,7)
+    swap0 BYTE 1,0,2,3,4,5,6,7,8
+    swap1 BYTE 0,2,1,3,4,5,6,7,8
+    swap2 BYTE 0,1,3,2,4,5,6,7,8
+    swap3 BYTE 0,1,2,4,3,5,6,7,8
+    swap4 BYTE 0,1,2,3,5,4,6,7,8
+    swap5 BYTE 0,1,2,3,4,6,5,7,8
+    swap6 BYTE 0,1,2,3,4,5,7,6,8
+    swap7 BYTE 0,1,2,3,4,5,6,8,7
 .code
 AsmMedianFilter proc
     ; Parameters:
