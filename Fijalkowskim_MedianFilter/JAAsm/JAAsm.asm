@@ -10,22 +10,26 @@
 .code
 AsmMedianFilter proc
     ; Parameters:
-    ; rcx - bitmap stripe 
+    ; rcx - bitmap 
     ; rdx - bitmap width
-    ; r8 - number of rows in this stripe
+    ; r8  - rows to filter
+    ; r9  - start row
+    ; [rsp+40] - bitmap height
     ; r10 - y (row)
     ; r11 - x (column)
     ; r12 - current pixel index
     ; rax - current pixel pointer
 
-    mov r10, 0                  ; Initialize row
-    mov r12, rdx               ; Initialize start stripe position (bitmapWitdth)
+    mov r10, r9                  ; Initialize row = startRow           
+    mov r12, r9         ; Initialize start pixel = startRow * bitmapWidth    
+    imul r12, rdx
 
 row_loop:
-    cmp r10, r8                 ; Check if we have reached the end of the stripe
+    mov r13, r8
+    add r13, r9
+    cmp r10, r13                 ; Check if we have reached the end of the stripe
     jge end_process            ; If so, end the process
-
-    mov r11, 0                  ; Initialize column index
+    mov r11, 0              ; Initialize column index
 
 column_loop:
     cmp r11, rdx                ; Check if we have reached the end of the row
@@ -39,14 +43,15 @@ column_loop:
     ;jmp apply_negative
 
 ;---------------Calculate 3x3 mask---------------
-    ;Point to mask array
     ;-------------------------------------top-left
     cmp r11, 0    
+    je handle_top_left  
+    cmp r10, 0
     je handle_top_left  
     mov rbx, 0  
     add rbx, rax 
     sub rbx, rdx
-    sub rbx, 3                  ; rbx = current - width - 3   
+    sub rbx, 3                 ; rbx = current - width - 3   
     call mask_to_registers
     jmp continue_top_left
 handle_top_left:
@@ -56,21 +61,29 @@ continue_top_left:
     pinsrb xmm1, r14, 0 
     pinsrb xmm2, r15, 0 
     ;-------------------------------------top-center
+    cmp r10, 0
+    je handle_top_center  
     mov rbx, 0    
     add rbx, rax 
     sub rbx, rdx                ; rbx = current - width      
     call mask_to_registers   
+    jmp continue_top_center
+handle_top_center:
+    call handle_edge
+continue_top_center:
     pinsrb xmm0, r13, 1
     pinsrb xmm1, r14, 1
     pinsrb xmm2, r15, 1
     ;-------------------------------------top-right
+    cmp r10, 0
+    je handle_top_right  
     mov r13, rdx
     sub r13, 3
     cmp r11, r13
     je handle_top_right
     mov rbx, 0              
     sub rbx, rdx      
-    add rbx, 3                  ; rbx = current - width + 3
+    add rbx, 3                 ; rbx = current - width + 3
     add rbx, rax     
     call mask_to_registers  
     jmp continue_top_right
@@ -84,7 +97,7 @@ continue_top_right:
     cmp r11, 0
     je handle_middle_left
     mov rbx, rax                
-    sub rbx, 3         ; rbx = current - 3   
+    sub rbx, 3        ; rbx = current - 3   
     call mask_to_registers
     jmp continue_middle_left
 handle_middle_left:
@@ -106,7 +119,7 @@ continue_middle_left:
     cmp r11, r13
 je handle_middle_right
     mov rbx, 0               
-    add rbx, 3                  ; rbx = current + 3
+    add rbx, 3                 ; rbx = current + 3
     add rbx, rax      
     call mask_to_registers
     jmp continue_middle_right
@@ -119,9 +132,13 @@ continue_middle_right:
     ;-------------------------------------bottom-left
     cmp r11, 0
     je handle_bottom_left
+    mov r13, [rsp+40]
+    sub r13, 1
+    cmp r10, r13
+    je handle_bottom_left
     mov rbx, 0                 
     add rbx, rdx
-    sub rbx, 3                  ; rbx = current + width - 3
+    sub rbx, 3                 ; rbx = current + width - 3
     add rbx, rax 
     call mask_to_registers
     jmp continue_bottom_left
@@ -132,21 +149,33 @@ continue_bottom_left:
     pinsrb xmm1, r14, 6
     pinsrb xmm2, r15, 6
     ;-------------------------------------bottom-center
+    mov r13, [rsp+40]
+    sub r13, 1
+    cmp r10, r13
+    je handle_bottom_center
     mov rbx, 0                
     add rbx, rdx                ; rbx = current + width
     add rbx, rax   
     call mask_to_registers
+    jmp continue_bottom_center
+handle_bottom_center:
+   call handle_edge
+continue_bottom_center:
     pinsrb xmm0, r13, 7
     pinsrb xmm1, r14, 7
     pinsrb xmm2, r15, 7
     ;-------------------------------------bottom-right
+    mov r13, [rsp+40]
+    sub r13, 1
+    cmp r10, r13
+    je handle_bottom_right
     mov r13, rdx
     sub r13, 3
     cmp r11, r13
     je handle_bottom_right
     mov rbx, 0                  
     add rbx, rdx      
-    add rbx, 3                  ; rbx = current + width + 3
+    add rbx, 3                 ; rbx = current + width + 3
     add rbx, rax   
     call mask_to_registers
     jmp continue_bottom_right
@@ -157,89 +186,83 @@ continue_bottom_right:
     pinsrb xmm1, r14, 8
     pinsrb xmm2, r15, 8
 
-    ;pextrb r9, xmm0, 0
-    ;mov byte ptr [rax], r9b
-    ;jmp next_pixel
-
     call start_sorting
     movaps xmm0, xmm1
     call start_sorting
     movaps xmm0, xmm2
     call start_sorting
     jmp next_pixel
-
-    jmp start_sorting
 ;---------------/Calculate 3x3 mask---------------
 
 ;-------------------------------------------------SORTING-------------------------------------------------
     ; xmm - 3x3 Array
     ; rbx - loop
-    ; r9 - current element 
-    ; r13 - next element
+    ; r13 - current element 
+    ; r14 - next element
 
 start_sorting:
     ; Sort the array (simple bubble sort for small arrays)                
     mov rbx, 0                   ; loop counter
 inner_loop:
-    pextrb r9, xmm0, 0       ; Load current element
-    pextrb r13, xmm0, 1           ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 0       ; Load current element
+    pextrb r14, xmm0, 1           ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_1               ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap0] 
     pshufb  xmm0, xmm3
 no_swap_1:
-    pextrb r9, xmm0, 1       ; Load current element
-    pextrb r13, xmm0, 2           ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 1       ; Load current element
+    pextrb r14, xmm0, 2           ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_2              ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap1] 
     pshufb  xmm0, xmm3
 no_swap_2:
-    pextrb r9, xmm0, 2       ; Load current element
-    pextrb r13, xmm0, 3           ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 2       ; Load current element
+    pextrb r14, xmm0, 3           ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_3               ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap2] 
     pshufb  xmm0, xmm3
 no_swap_3:
-    pextrb r9, xmm0, 3       ; Load current element
-    pextrb r13, xmm0, 4           ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 3       ; Load current element
+    pextrb r14, xmm0, 4           ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_4               ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap3] 
     pshufb  xmm0, xmm3
 no_swap_4:
-    pextrb r9, xmm0, 4       ; Load current element
-    pextrb r13, xmm0, 5          ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 4       ; Load current element
+    pextrb r14, xmm0, 5          ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_5               ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap4] 
     pshufb  xmm0, xmm3
 no_swap_5:
-    pextrb r9, xmm0, 5      ; Load current element
-    pextrb r13, xmm0, 6           ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 5      ; Load current element
+    pextrb r14, xmm0, 6           ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_6               ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap5] 
     pshufb  xmm0, xmm3
 no_swap_6:
-    pextrb r9, xmm0, 6       ; Load current element
-    pextrb r13, xmm0, 7           ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 6       ; Load current element
+    pextrb r14, xmm0, 7           ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_7               ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap6] 
     pshufb  xmm0, xmm3
 no_swap_7:
-    pextrb r9, xmm0, 7       ; Load current element
-    pextrb r13, xmm0, 8           ; Load next element
-    cmp r9, r13                ; Compare current and next element
+    pextrb r13, xmm0, 7       ; Load current element
+    pextrb r14, xmm0, 8           ; Load next element
+    cmp r13, r14                ; Compare current and next element
     jbe no_swap_8               ; Jump if not greater (no swap needed)
     ; Swap elements
     movdqu  xmm3, xmmword ptr [swap7] 
@@ -250,25 +273,16 @@ no_swap_8:
     jl inner_loop               ; Jump if outer loop counter < 8
 
     ; Select the middle element from the sorted array
-    pextrb r9, xmm0, 4
-    mov byte ptr [rax], r9b
+    pextrb r13, xmm0, 4
+    mov byte ptr [rax], r13b
     inc rax
     ret
     
 ;-------------------------------------------------/SORTING-------------------------------------------------
  
-
-
-;--Example------------
-apply_negative:
-    mov r9, 255
-    sub r9, [rax]
-    mov byte ptr [rax], r9b
-    jmp next_pixel
-
 next_pixel:
     add r11, 3                 ; Increment column index
-    add r12, 3                  ; Increment pixel index
+    add r12, 3                 ; Increment pixel index
     jmp column_loop             ; Repeat for the next column
 next_row:
     add r10, 1                  ; Increment row index

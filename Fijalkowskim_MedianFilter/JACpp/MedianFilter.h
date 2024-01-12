@@ -2,15 +2,15 @@
 #include "pch.h"
 #include <algorithm>
 
-extern "C" __declspec(dllexport) void CppMedianFilter(unsigned char* stripe, int bitmapWidth, int rows)
+extern "C" __declspec(dllexport) void CppMedianFilter(unsigned char* stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight)
 {
 	int indexes[9];
 	unsigned char fileredMaskR[9];
 	unsigned char fileredMaskG[9];
 	unsigned char fileredMaskB[9];
 	
-	int pixelIndex = bitmapWidth;
-	for (int y = 0; y < rows; y++)
+	int pixelIndex = startRow * bitmapWidth;
+	for (int y = startRow; y < startRow + rows; y++)
 	{
 		for (int x = 0; x < bitmapWidth; x += 3)
 		{
@@ -25,24 +25,20 @@ extern "C" __declspec(dllexport) void CppMedianFilter(unsigned char* stripe, int
 			indexes[8] = pixelIndex + bitmapWidth + 3;
 
 			for (size_t i = 0; i < 9; i++)
-			{   // 0 1 2
-				// X - -
-				// 3 4 5
-				// X - -
-				// 6 7 8
-				// X - -
-				bool leftEdge = x == 0 && (i == 0 || i == 3 || i == 6);
+			{   //  i =
 				// 0 1 2
-				// - - X
 				// 3 4 5
-				// - - X
 				// 6 7 8
-				// - - X
+				bool leftEdge = x == 0 && (i == 0 || i == 3 || i == 6);
 				bool rightEdge = x == bitmapWidth - 3 && (i == 2 || i == 5 || i == 8);
+				bool topBottomEdge = (i < 3 && y == 0) || (i > 5 && y == bitmapHeight - 1);
+				if (topBottomEdge) {
+					indexes[0] = indexes[0];
+				}
 
-				fileredMaskR[i] = leftEdge || rightEdge ? 0 : stripe[indexes[i]];
-				fileredMaskG[i] = leftEdge || rightEdge ? 0 : stripe[indexes[i]+ 1];
-				fileredMaskB[i] = leftEdge || rightEdge ? 0 : stripe[indexes[i] + 2];
+				fileredMaskR[i] = leftEdge || rightEdge || topBottomEdge ? 0 : stripe[indexes[i]];
+				fileredMaskG[i] = leftEdge || rightEdge || topBottomEdge ? 0 : stripe[indexes[i]+ 1];
+				fileredMaskB[i] = leftEdge || rightEdge || topBottomEdge ? 0 : stripe[indexes[i] + 2];
 			}
 			std::sort(std::begin(fileredMaskR), std::end(fileredMaskR));
 			std::sort(std::begin(fileredMaskG), std::end(fileredMaskG));
