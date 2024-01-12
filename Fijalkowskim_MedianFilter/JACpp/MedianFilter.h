@@ -4,42 +4,50 @@
 
 extern "C" __declspec(dllexport) void CppMedianFilter(unsigned char* stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight)
 {
-	int indexes[9];
-	unsigned char fileredMaskR[9];
-	unsigned char fileredMaskG[9];
-	unsigned char fileredMaskB[9];
+	unsigned char fileredMaskR[9], fileredMaskG[9], fileredMaskB[9];
+	bool leftEdge, rightEdge, topEdge, bottomEdge = false;
+	const short int indexes[9] = { -bitmapWidth - 3, -bitmapWidth,-bitmapWidth + 3, -3, 0, +3, bitmapWidth - 3, bitmapWidth, bitmapWidth + 3 };
 	
-	int pixelIndex = startRow * bitmapWidth;
-	for (int y = startRow; y < startRow + rows; y++)
+	unsigned int pixelIndex = startRow * bitmapWidth;
+	for (unsigned short int y = startRow; y < startRow + rows; y++)
 	{
-		for (int x = 0; x < bitmapWidth; x += 3)
+		for (unsigned short int x = 0; x < bitmapWidth; x += 3)
 		{
-			indexes[0] = pixelIndex - bitmapWidth - 3;
-			indexes[1] = pixelIndex - bitmapWidth;
-			indexes[2] = pixelIndex - bitmapWidth + 3;
-			indexes[3] = pixelIndex - 3;
-			indexes[4] = pixelIndex;
-			indexes[5] = pixelIndex + 3;
-			indexes[6] = pixelIndex + bitmapWidth - 3;
-			indexes[7] = pixelIndex + bitmapWidth;
-			indexes[8] = pixelIndex + bitmapWidth + 3;
+			leftEdge = x == 0;
+			rightEdge = x == bitmapWidth - 3;
+			topEdge = y == 0;
+			bottomEdge = y == bitmapHeight - 1;
 
-			for (size_t i = 0; i < 9; i++)
-			{   //  i =
-				// 0 1 2
-				// 3 4 5
-				// 6 7 8
-				bool leftEdge = x == 0 && (i == 0 || i == 3 || i == 6);
-				bool rightEdge = x == bitmapWidth - 3 && (i == 2 || i == 5 || i == 8);
-				bool topBottomEdge = (i < 3 && y == 0) || (i > 5 && y == bitmapHeight - 1);
-				if (topBottomEdge) {
-					indexes[0] = indexes[0];
-				}
+			fileredMaskR[0] = leftEdge || topEdge ? 0 :		stripe[pixelIndex + indexes[0]];
+			fileredMaskR[1] = topEdge ? 0 :					stripe[pixelIndex + indexes[1]];
+			fileredMaskR[2] = rightEdge || topEdge ? 0 :	stripe[pixelIndex + indexes[2]];
+			fileredMaskR[3] = leftEdge ? 0 :				stripe[pixelIndex + indexes[3]];
+			fileredMaskR[4] =								stripe[pixelIndex + indexes[4]];
+			fileredMaskR[5] = rightEdge ? 0 :				stripe[pixelIndex + indexes[5]];
+			fileredMaskR[6] = leftEdge || bottomEdge ? 0 :	stripe[pixelIndex + indexes[6]];
+			fileredMaskR[7] = bottomEdge ? 0 :				stripe[pixelIndex + indexes[7]];
+			fileredMaskR[8] = rightEdge || bottomEdge ? 0 : stripe[pixelIndex + indexes[8]];
 
-				fileredMaskR[i] = leftEdge || rightEdge || topBottomEdge ? 0 : stripe[indexes[i]];
-				fileredMaskG[i] = leftEdge || rightEdge || topBottomEdge ? 0 : stripe[indexes[i]+ 1];
-				fileredMaskB[i] = leftEdge || rightEdge || topBottomEdge ? 0 : stripe[indexes[i] + 2];
-			}
+			fileredMaskG[0] = leftEdge || topEdge ? 0 :		stripe[pixelIndex + indexes[0] + 1];
+			fileredMaskG[1] = topEdge ? 0 :					stripe[pixelIndex + indexes[1] + 1];
+			fileredMaskG[2] = rightEdge || topEdge ? 0 :	stripe[pixelIndex + indexes[2] + 1];
+			fileredMaskG[3] = leftEdge ? 0 :				stripe[pixelIndex + indexes[3] + 1];
+			fileredMaskG[4] =								stripe[pixelIndex + indexes[4] + 1];
+			fileredMaskG[5] = rightEdge ? 0 :				stripe[pixelIndex + indexes[5] + 1];
+			fileredMaskG[6] = leftEdge || bottomEdge ? 0 :	stripe[pixelIndex + indexes[6] + 1];
+			fileredMaskG[7] = bottomEdge ? 0 :				stripe[pixelIndex + indexes[7] + 1];
+			fileredMaskG[8] = rightEdge || bottomEdge ? 0 : stripe[pixelIndex + indexes[8] + 1];
+
+			fileredMaskB[0] = leftEdge || topEdge ? 0 :		stripe[pixelIndex + indexes[0] + 2];
+			fileredMaskB[1] = topEdge ? 0 :					stripe[pixelIndex + indexes[1] + 2];
+			fileredMaskB[2] = rightEdge || topEdge ? 0 :	stripe[pixelIndex + indexes[2] + 2];
+			fileredMaskB[3] = leftEdge ? 0 :				stripe[pixelIndex + indexes[3] + 2];
+			fileredMaskB[4] =								stripe[pixelIndex + indexes[4] + 2];
+			fileredMaskB[5] = rightEdge ? 0 :				stripe[pixelIndex + indexes[5] + 2];
+			fileredMaskB[6] = leftEdge || bottomEdge ? 0 :	stripe[pixelIndex + indexes[6] + 2];
+			fileredMaskB[7] = bottomEdge ? 0 :				stripe[pixelIndex + indexes[7] + 2];
+			fileredMaskB[8] = rightEdge || bottomEdge ? 0 : stripe[pixelIndex + indexes[8] + 2];
+		
 			std::sort(std::begin(fileredMaskR), std::end(fileredMaskR));
 			std::sort(std::begin(fileredMaskG), std::end(fileredMaskG));
 			std::sort(std::begin(fileredMaskB), std::end(fileredMaskB));

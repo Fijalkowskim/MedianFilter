@@ -13,18 +13,18 @@ namespace Fijalkowskim_MedianFilter
     public class DataManager
     {
 #if DEBUG
-        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll")]
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe static extern void AsmMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 
-        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe static extern void CppMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 
 #else
-        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll")]
-        unsafe static extern void AsmMedianFilter(byte* stripe, int bitmapWidth, int rows);
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll", CallingConvention = CallingConvention.Cdecl)]
+          unsafe static extern void AsmMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 
-        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JACpp.dll", CallingConvention = CallingConvention.StdCall)]
-        unsafe static extern void CppMedianFilter(byte* stripe, int bitmapWidth, int rows);
+        [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JACpp.dll", CallingConvention = CallingConvention.Cdecl)]
+         unsafe static extern void CppMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 #endif
         Controller controller;
         //Bitmap
@@ -37,7 +37,6 @@ namespace Fijalkowskim_MedianFilter
         public bool applyingFilter { get; private set; }
         public bool dataLoaded { get; private set; }
         static readonly object _lock = new object();
-        private CancellationTokenSource cancellationTokenSource;
         //Stopwatch
         public long currentExecutionTime { get; private set; }
         public long previousExecutionTime { get; private set; }
@@ -72,8 +71,6 @@ namespace Fijalkowskim_MedianFilter
             //Variables
             List<Task> tasks = new List<Task>();
             ImageLoadingProgress report = new ImageLoadingProgress();
-
-            //SaveBitmapToFile(loadedBitmap, "OriginalBitmap.txt");
             Rectangle rect = new Rectangle(0, 0, result.Width, result.Height);
             BitmapData bmpData = result.LockBits(rect,ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             IntPtr ptr = bmpData.Scan0;
@@ -86,23 +83,13 @@ namespace Fijalkowskim_MedianFilter
 
                 //C++
                 case DllType.CPP:
-                    //Main filtering tasks
                     for (int i = 0; i < numberOfTasks; i++)
                     {
                         TaskData taskData = tasksData[i];
 
                         tasks.Add(Task.Run(() =>
                         {
-                            //int noTasks = numberOfTasks;
-
                             CppMedianFilter(ptr, bitmapWidth, taskData.rows, taskData.startRow, bitmapHeight);
-                            /*lock (_lock)
-                            {
-                                report.percentageDone += 100 / noTasks;
-                                progress.Report(report);
-                            }
-                            return res;*/
-
                         }));
                     }
                     break;
