@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 // Mateusz Fijałkowski
@@ -19,12 +21,14 @@ namespace Fijalkowskim_MedianFilter
         float filterCooldown = 100f;
         //Stopwatch for time measurements
         Stopwatch stopwatch;
+        //Controlling if simulation of filtering with tasks from 1 to 64 is finished
+        bool simulating = false;
         //Constructor for initializing components
         public MainMenu(Controller controller)
         {
             InitializeComponent();
             this.controller = controller;
-
+            simulating = false;
             currentExecutionTimeLabel.Text = "";
             previousExecutionTimeLabel.Text = "";
             imageLoadedLabel.Visible = false;
@@ -35,7 +39,7 @@ namespace Fijalkowskim_MedianFilter
         //Event for upload button click
         private void uploadImageButton_Click(object sender, EventArgs e)
         {
-            if(controller.dataManager.applyingFilter)
+            if(controller.dataManager.applyingFilter || simulating)
             {
                 MessageBox.Show("Wait untill last process finishes", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -53,6 +57,7 @@ namespace Fijalkowskim_MedianFilter
                     bitmap = new Bitmap(dialog.FileName);
                     controller.dataManager.LoadBitmap(bitmap);
                     baseImagePreview.Image = bitmap;
+                    imageLoadedLabel.Text = "Image loaded";
                     imageLoadedLabel.Visible = true;
                 }
             }
@@ -70,7 +75,7 @@ namespace Fijalkowskim_MedianFilter
         private async void filterImageButton_Click(object sender, EventArgs e)
         {
             //Click cooldown
-            if(stopwatch.ElapsedMilliseconds < filterCooldown)
+            if(stopwatch.ElapsedMilliseconds < filterCooldown || simulating)
             {
                 MessageBox.Show("Wait a second before filtering again", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -120,7 +125,7 @@ namespace Fijalkowskim_MedianFilter
         //Event for save button click
         private void saveButton_Click(object sender, EventArgs e)
         {
-            if(resultImagePreview.Image == null)
+            if(resultImagePreview.Image == null || simulating)
             {
                 MessageBox.Show("There is no image to save", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -132,6 +137,46 @@ namespace Fijalkowskim_MedianFilter
             {
                 resultImagePreview.Image.Save(sf.FileName);
             }
+        }
+        //Helper button for printing execution time of filtering into text file
+        private async void simulateBtn_Click(object sender, EventArgs e)
+        {
+            if (!controller.dataManager.dataLoaded)
+            {
+                MessageBox.Show("You must upload an image first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (simulating)
+            {
+                MessageBox.Show("Wait for simulation to be over", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            simulating = true;
+            string fileName = controller.dataManager.loadedBitmap.Width.ToString() + "x" + controller.dataManager.loadedBitmap.Height.ToString();
+            DllType dllType = selectAsm.Checked ? DllType.ASM : selectCpp.Checked ? DllType.CPP : DllType.CPP;
+            fileName += dllType == DllType.ASM ? " ASM" : " CPP";
+            fileName += ".txt";
+            using (StreamWriter file = new StreamWriter(fileName, false))
+            {
+                file.WriteLine("\"Tasks\",\"Time\"");
+                //Simulating several times for accurate time
+                int simulationsForTask = 6;
+                long[] times = new long[simulationsForTask];
+                imageLoadedLabel.Text = "Simulated tasks: ";
+                imageLoadedLabel.Visible = true;
+                //Simulate number of tasks from 1 to 64
+                for (int i = 1; i <= 64; i++)
+                {
+                    imageLoadedLabel.Text = "Simulated tasks: " + i.ToString();
+                    for (int j = 0; j < simulationsForTask; j++)
+                    {
+                        times[j] = await controller.dataManager.SimulateFiltering(dllType, i);
+                    }
+                    file.WriteLine(i.ToString() + "," + times.Min());
+                }
+            }
+            imageLoadedLabel.Text = "Simulation done";
+            simulating = false;
         }
     }
 }

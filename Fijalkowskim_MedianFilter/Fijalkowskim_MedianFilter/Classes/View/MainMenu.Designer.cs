@@ -49,6 +49,7 @@ namespace Fijalkowskim_MedianFilter
             this.imageLoadingProgress = new System.Windows.Forms.ProgressBar();
             this.imageLoadedLabel = new System.Windows.Forms.Label();
             this.saveButton = new System.Windows.Forms.Button();
+            this.simulateBtn = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.baseImagePreview)).BeginInit();
             this.basePreviewGroup.SuspendLayout();
@@ -254,11 +255,24 @@ namespace Fijalkowskim_MedianFilter
             this.saveButton.UseVisualStyleBackColor = true;
             this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
+            // simulateBtn
+            // 
+            this.simulateBtn.Font = new System.Drawing.Font("Roboto Slab", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.simulateBtn.Location = new System.Drawing.Point(721, 554);
+            this.simulateBtn.Margin = new System.Windows.Forms.Padding(5);
+            this.simulateBtn.Name = "simulateBtn";
+            this.simulateBtn.Size = new System.Drawing.Size(190, 58);
+            this.simulateBtn.TabIndex = 26;
+            this.simulateBtn.Text = "Simulate for tasks 1-64";
+            this.simulateBtn.UseVisualStyleBackColor = true;
+            this.simulateBtn.Click += new System.EventHandler(this.simulateBtn_Click);
+            // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1376, 767);
+            this.Controls.Add(this.simulateBtn);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.imageLoadedLabel);
             this.Controls.Add(this.imageLoadingProgress);
@@ -310,6 +324,7 @@ namespace Fijalkowskim_MedianFilter
         private System.Windows.Forms.ProgressBar imageLoadingProgress;
         private System.Windows.Forms.Label imageLoadedLabel;
         private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.Button simulateBtn;
     }
 }
 

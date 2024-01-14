@@ -162,5 +162,58 @@ namespace Fijalkowskim_MedianFilter
             currentExecutionTime = stopwatch.ElapsedMilliseconds;
             controller.mainMenu.SetExecutionTime(currentExecutionTime.ToString(), previousExecutionTime < 0 ? "" : previousExecutionTime.ToString());
         }
+        //Helper method for simulating filtering and printing execution times to file
+        public async Task<long> SimulateFiltering(DllType dllType, int numberOfTasks)
+        {
+            if (applyingFilter || loadedBitmap == null) return -1;
+            applyingFilter = true;
+            //Result is clone of loaded bitmap. All filtering is done directly onto this. Result is then returned and set in mainMenu for preview.
+            Bitmap result = new Bitmap(loadedBitmap);
+            //Method for setting tasks
+            SetUpTasks(numberOfTasks);
+            //List of tasks applying filter
+            List<Task> tasks = new List<Task>();
+            //Locking bitmap and getting pointer to the first element.
+            Rectangle rect = new Rectangle(0, 0, result.Width, result.Height);
+            BitmapData bmpData = result.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            IntPtr ptr = bmpData.Scan0;
+            //Restarting timer for measuring filtering time
+            stopwatch.Reset();
+            stopwatch.Start();
+            //Depending on dllType selected by user c++ or assembly filter is chosen. Filtering is then applied on separate tasks simultaneously
+            switch (dllType)
+            {
+                //C++
+                case DllType.CPP:
+                    for (int i = 0; i < numberOfTasks; i++)
+                    {
+                        TaskData taskData = tasksData[i];
+
+                        tasks.Add(Task.Run(() =>
+                        {
+                            CppMedianFilter(ptr, bitmapWidth, taskData.rows, taskData.startRow, bitmapHeight);
+                        }));
+                    }
+                    break;
+                //Assembly
+                case DllType.ASM:
+                    for (int i = 0; i < numberOfTasks; i++)
+                    {
+                        TaskData taskData = tasksData[i];
+
+                        tasks.Add(Task.Run(() =>
+                        {
+                            AsmMedianFilter(ptr, bitmapWidth, taskData.rows, taskData.startRow, bitmapHeight);
+                        }));
+                    }
+                    break;
+            }
+            //After all tasks are finished unlock bitmap, report progress, stop the timer and return result to mainMenu
+            await Task.WhenAll(tasks);
+            result.UnlockBits(bmpData);
+            stopwatch.Stop();
+            applyingFilter = false;
+            return stopwatch.ElapsedMilliseconds;
+        }
     }
 }
