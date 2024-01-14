@@ -11,6 +11,5 @@ namespace Fijalkowskim_MedianFilter
     {
         public int rows;
         public int startRow;
-        public List<byte> bitmapStripe;
     }
 }
