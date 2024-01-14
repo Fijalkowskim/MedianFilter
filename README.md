@@ -1,5 +1,5 @@
 # Median Filter Project
-![image](https://github.com/Fijalkowskim/MedianFilter/assets/91847461/48b00b36-7695-470b-a669-457fce4b97b1)
+![image](https://github.com/Fijalkowskim/MedianFilter/assets/91847461/be8d74d2-293e-4887-a857-a1b5dc3c7e9c)
 
 ## Introduction
 This project implements a median filter for image processing using C# (Windows Forms Application). The filter is applied to an image, and the implementation utilizes two external dynamic-link libraries (DLLs) written in C++ and x64 assembly. The project allows configuring the number of threads used for parallel processing.
