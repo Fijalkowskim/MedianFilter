@@ -200,7 +200,7 @@ namespace Fijalkowskim_MedianFilter
             // threadsNumber
             // 
             this.threadsNumber.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.threadsNumber.Location = new System.Drawing.Point(359, 502);
+            this.threadsNumber.Location = new System.Drawing.Point(359, 495);
             this.threadsNumber.MaxLength = 2;
             this.threadsNumber.Name = "threadsNumber";
             this.threadsNumber.PlaceholderText = "1";
@@ -212,7 +212,7 @@ namespace Fijalkowskim_MedianFilter
             // enterThreadsNumber
             // 
             this.enterThreadsNumber.AutoSize = true;
-            this.enterThreadsNumber.Location = new System.Drawing.Point(33, 502);
+            this.enterThreadsNumber.Location = new System.Drawing.Point(33, 495);
             this.enterThreadsNumber.Name = "enterThreadsNumber";
             this.enterThreadsNumber.Size = new System.Drawing.Size(286, 26);
             this.enterThreadsNumber.TabIndex = 21;
@@ -257,13 +257,13 @@ namespace Fijalkowskim_MedianFilter
             // 
             // simulateBtn
             // 
-            this.simulateBtn.Font = new System.Drawing.Font("Roboto Slab", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.simulateBtn.Font = new System.Drawing.Font("Roboto Slab", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.simulateBtn.Location = new System.Drawing.Point(721, 554);
             this.simulateBtn.Margin = new System.Windows.Forms.Padding(5);
             this.simulateBtn.Name = "simulateBtn";
             this.simulateBtn.Size = new System.Drawing.Size(190, 58);
             this.simulateBtn.TabIndex = 26;
-            this.simulateBtn.Text = "Simulate for tasks 1-64";
+            this.simulateBtn.Text = "Run simulation";
             this.simulateBtn.UseVisualStyleBackColor = true;
             this.simulateBtn.Click += new System.EventHandler(this.simulateBtn_Click);
             // 
