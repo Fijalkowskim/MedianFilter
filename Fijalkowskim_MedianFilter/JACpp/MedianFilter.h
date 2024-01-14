@@ -4,10 +4,18 @@
 #pragma once
 #include "pch.h"
 #include <algorithm>
+
+//Method applying median filtering directly onto given bitmap pointer
+// 
+//Median filtering - The filtering algorithm involves determining the median (middle value) of the values of neighboring pixels in a mask of a selected size (in my case the mask is 3x3).
+//After calculating the median, its value is saved to the currently processed pixel. If a pixel is on an edge, its neighbors are assumed to have a value of 0.
+//R, G and B channels are filtered separately.
+// 
 //bitmap - Pointer to original bitmap
 //bitmapWidth - Width of bitmap taking into account rgb channels (pixels width * 3)
 //rows - Rows to filter (from task data)
 //startRow - Row of bitmap to start filtering (from task data)
+
 extern "C" __declspec(dllexport) void CppMedianFilter(unsigned char* bitmap, int bitmapWidth, int rows, int startRow, int bitmapHeight)
 {
 	//9 element arays of neighbour pixels for calculating median

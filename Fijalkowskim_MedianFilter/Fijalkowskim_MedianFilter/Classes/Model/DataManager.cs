@@ -13,8 +13,10 @@ using System.Drawing.Imaging;
 namespace Fijalkowskim_MedianFilter
 {  
     public enum DllType { CPP, ASM }
+    //Most important class of the application for handling image filtering from c++ and assembly DLLs.
     public class DataManager
     {
+        //Import proper DLLs 
 #if DEBUG
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll", CallingConvention = CallingConvention.Cdecl)]
         unsafe static extern void AsmMedianFilter(IntPtr bitmap, int bitmapWidth, int rows, int startRow, int bitmapHeight);
@@ -24,28 +26,29 @@ namespace Fijalkowskim_MedianFilter
 
 #else
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll", CallingConvention = CallingConvention.Cdecl)]
-          unsafe static extern void AsmMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
+          unsafe static extern void AsmMedianFilter(IntPtr bitmap, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JACpp.dll", CallingConvention = CallingConvention.Cdecl)]
-         unsafe static extern void CppMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
+         unsafe static extern void CppMedianFilter(IntPtr bitmap, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 #endif
-        Controller controller;
-        //Bitmap
+        
+        //Bitmap data variables
         public Bitmap loadedBitmap { get; private set; }
         int bitmapWidth, bitmapHeight;
-        //Tasks
+        //Tasks data variables
         int numberOfTasks;
-        TaskData[] tasksData;      
-        //Controll variables
+        TaskData[] tasksData;
+        //Control variables
+        Controller controller;
         public bool applyingFilter { get; private set; }
         public bool dataLoaded { get; private set; }
         static readonly object _lock = new object();
-        //Stopwatch
+        //Time measurement variables
         public long currentExecutionTime { get; private set; }
         public long previousExecutionTime { get; private set; }
         Stopwatch stopwatch;
-        //---------
 
+        //Contructor initializes data
         public DataManager(Controller controller)
         {
             this.controller = controller;
@@ -56,7 +59,7 @@ namespace Fijalkowskim_MedianFilter
             dataLoaded = false;
             applyingFilter = false;
         }
-
+        //Method for loading bitmap data
         public void LoadBitmap(Bitmap bitmap)
         {
             this.loadedBitmap = bitmap; 
@@ -64,26 +67,28 @@ namespace Fijalkowskim_MedianFilter
             bitmapWidth = bitmap.Width * 3;
             dataLoaded = true;       
         }
+        //Main method for applying median filtering called from mainMenu class.
         public async Task<Bitmap> UseMedianFilter(DllType dllType, int numberOfTasks, IProgress<ImageLoadingProgress> progress)
         {
             if (applyingFilter || loadedBitmap == null) return null;
             applyingFilter = true;
+            //Result is clone of loaded bitmap. All filtering is done directly onto this. Result is then returned and set in mainMenu for preview.
             Bitmap result = new Bitmap(loadedBitmap);
-            //Setting tasks
+            //Method for setting tasks
             SetUpTasks(numberOfTasks);
-            //Variables
+            //List of tasks applying filter
             List<Task> tasks = new List<Task>();
             ImageLoadingProgress report = new ImageLoadingProgress();
+            //Locking bitmap and getting pointer to the first element.
             Rectangle rect = new Rectangle(0, 0, result.Width, result.Height);
             BitmapData bmpData = result.LockBits(rect,ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             IntPtr ptr = bmpData.Scan0;
-            //Timer
+            //Restarting timer for measuring filtering time
             stopwatch.Reset();
             stopwatch.Start();
-
+            //Depending on dllType selected by user c++ or assembly filter is chosen. Filtering is then applied on separate tasks simultaneously
             switch (dllType)
             {
-
                 //C++
                 case DllType.CPP:
                     for (int i = 0; i < numberOfTasks; i++)
@@ -109,6 +114,7 @@ namespace Fijalkowskim_MedianFilter
                     }
                     break;
             }
+            //After all tasks are finished unlock bitmap, report progress, stop the timer and return result to mainMenu
             await Task.WhenAll(tasks);
             result.UnlockBits(bmpData);    
             stopwatch.Stop();
@@ -118,22 +124,27 @@ namespace Fijalkowskim_MedianFilter
             applyingFilter = false;
             return result;          
         }
-
+        //Method for setting tasks data based on number of tasks selected by user.
+        //Each task is responsible for calculated number of rows of bitmap.
+        //If rows cannot be distributed evenly throughout tasks additional rows are added to initial tasks one at the time.
         void SetUpTasks(int numberOfTasks)
         {
+            //If number of tasks chosen by user is greater then bitmap height, clamp it.
             this.numberOfTasks = Math.Min(numberOfTasks, bitmapHeight);
-
             tasksData = new TaskData[numberOfTasks];
+            //Calculate how many rows should be handled by each task
             int taskBitmapRange = bitmapHeight / numberOfTasks;
+            //Undivided range is number of rows that cannot be distributed evenly
             int undvidedRange = bitmapHeight - numberOfTasks * taskBitmapRange;
             int startRow = 0;
 
             for (int i = 0; i < numberOfTasks; i++)
             {
+                //Add data for each task
                 tasksData[i] = new TaskData();
                 tasksData[i].rows = taskBitmapRange;
                 tasksData[i].startRow = startRow;
-
+                //If there are some undivided rows, add them to current task
                 if (undvidedRange != 0)
                 {
                     tasksData[i].rows++;
@@ -143,6 +154,7 @@ namespace Fijalkowskim_MedianFilter
             }
             
         }
+        //Method for displaying execution time of filtering methods
         void HandleTimer()
         {
             if (currentExecutionTime != -1)

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 
 namespace Fijalkowskim_MedianFilter
 {
+    //Controller class contains only instances of dataManager and mainMenu and allows for communication between them. (MVC model)
     public class Controller
     {
         public DataManager dataManager { get; private set; }
@@ -19,13 +20,5 @@ namespace Fijalkowskim_MedianFilter
             dataManager = new DataManager(this);
             mainMenu = new MainMenu(this);
         }
-
-        /*public async Task<Bitmap> GetFunctionResult(DllType dllType, IProgress<ImageLoadingProgress> progress)
-        {
-            Bitmap result = await dataManager.UseMedianFilter(dllType, progress);
-            mainMenu.SetExecutionTime(dataManager.currentExecutionTime != TimeSpan.Zero ? dataManager.currentExecutionTime.ToString() : "", 
-                dataManager.previousExecutionTime != TimeSpan.Zero ? dataManager.previousExecutionTime.ToString() : "");
-            return result;
-        }*/
     }
 }

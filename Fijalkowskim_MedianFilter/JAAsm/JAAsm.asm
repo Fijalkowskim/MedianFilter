@@ -1,6 +1,10 @@
 ; Mateusz Fija³kowski
 ; Median Filter v1 - 14.01.2024
 ; Silesian University of Technology 2023/24
+
+; Median filtering - The filtering algorithm involves determining the median (middle value) of the values of neighboring pixels in a mask of a selected size (in my case the mask is 3x3).
+; After calculating the median, its value is saved to the currently processed pixel. If a pixel is on an edge, its neighbors are assumed to have a value of 0.
+; R, G and B channels are filtered separately.
 .data
     swap0 BYTE 1,0,2,3,4,5,6,7,8 ; Arrays for pshufb instruction (swapping bytes in xmm register)
     swap1 BYTE 0,2,1,3,4,5,6,7,8

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace Fijalkowskim_MedianFilter
 {
+    //Simple class for task data (rows to filter in current task and starting row)
     public class TaskData
     {
         public int rows;

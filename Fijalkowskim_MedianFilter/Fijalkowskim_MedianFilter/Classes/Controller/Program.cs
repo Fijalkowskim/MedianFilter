@@ -7,9 +7,9 @@ using System.Windows.Forms;
 
 namespace Fijalkowskim_MedianFilter
 {
+    //Main class for running application
     static class Program
-    {
-        
+    {   
         [STAThread]
         static void Main()
         {
