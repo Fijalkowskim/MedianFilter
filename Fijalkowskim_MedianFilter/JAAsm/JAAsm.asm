@@ -1,3 +1,6 @@
+; Mateusz Fija³kowski
+; Median Filter v1 - 14.01.2024
+; Silesian University of Technology 2023/24
 .data
     swap0 BYTE 1,0,2,3,4,5,6,7,8 ; Arrays for pshufb instruction (swapping bytes in xmm register)
     swap1 BYTE 0,2,1,3,4,5,6,7,8

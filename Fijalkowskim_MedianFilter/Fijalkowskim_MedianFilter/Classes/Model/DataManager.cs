@@ -1,23 +1,26 @@
 ﻿using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System;
-using System.Threading;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 
+// Mateusz Fijałkowski
+// Median Filter v1 - 14.01.2024
+// Silesian University of Technology 2023/24
+
 namespace Fijalkowskim_MedianFilter
 {  
-    public enum DllType { CPP, ASM}
+    public enum DllType { CPP, ASM }
     public class DataManager
     {
 #if DEBUG
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JAAsm.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe static extern void AsmMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
+        unsafe static extern void AsmMedianFilter(IntPtr bitmap, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Debug\JACpp.dll", CallingConvention = CallingConvention.Cdecl)]
-        unsafe static extern void CppMedianFilter(IntPtr stripe, int bitmapWidth, int rows, int startRow, int bitmapHeight);
+        unsafe static extern void CppMedianFilter(IntPtr bitmap, int bitmapWidth, int rows, int startRow, int bitmapHeight);
 
 #else
         [DllImport(@"D:\.1Studia\JA\MedianFilter\Fijalkowskim_MedianFilter\x64\Release\JAAsm.dll", CallingConvention = CallingConvention.Cdecl)]

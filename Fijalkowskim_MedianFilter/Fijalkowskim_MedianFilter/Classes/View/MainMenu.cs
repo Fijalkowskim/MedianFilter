@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+
+// Mateusz Fijałkowski
+// Median Filter v1 - 14.01.2024
+// Silesian University of Technology 2023/24
 
 
 namespace Fijalkowskim_MedianFilter

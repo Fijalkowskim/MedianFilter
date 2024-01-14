@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
+// Mateusz Fija³kowski
+// Median Filter v1 - 14.01.2024
+// Silesian University of Technology 2023/24
 
 namespace Fijalkowskim_MedianFilter
 {
